@@ -23,7 +23,7 @@ from web_autobuy import autobuy
                 'name': 'Bloodweb AutoBuy',
                 'description': 'Automated Bloodweb progression for Dead by Daylight',
                 'version': '1.0.0',
-                'copyright': '2020',
+                'copyright': '2022',
                 'website': 'https://github.com/NG0N/BloodwebAutoBuy',
                 'license': 'MIT'
             },
@@ -92,7 +92,7 @@ def main():
                             widget='IntegerField')    
     
     advanced_group.add_argument('--prestige_color_threshold',
-                            default=4,
+                            default=50,
                             metavar='Prestige color detection threshold',
                             help="Customize the detection tolerance for prestige icon. Too high values can result in false positives.\nDefault: 4",
                             widget='IntegerField')
