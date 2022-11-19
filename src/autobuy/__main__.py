@@ -111,7 +111,9 @@ def main():
         ordering = "reverse"
         
     # Run the main program
-    autobuy(verbose = bool(args.verbose), 
+    autobuy(
+            start_paused = bool(args.start_paused),
+            verbose = bool(args.verbose), 
             monitor_index = int(args.monitor_index), 
             time_limit = float(args.time_limit) * 60.0, 
             should_prestige = bool(args.should_prestige), 

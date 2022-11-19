@@ -157,7 +157,8 @@ def on_press(key):
 
 # Main program loop
 def autobuy(
-        verbose : bool = True,
+        start_paused : bool = False,
+        verbose : bool = False,
         monitor_index : int = 1,
         time_limit : float = 0,
         should_prestige : bool = True,
@@ -169,6 +170,8 @@ def autobuy(
     global stop_program
     global pause_program
     global last_mouse_pos
+    
+    
     time_limit_enabled = time_limit > 0.0
     reverse = ordering == "reverse"
     shuffle = ordering == "shuffle"
@@ -188,7 +191,11 @@ def autobuy(
     # Start listening for pause and stop commands
     with keyboard.Listener(on_press=on_press) as listener:
         
-        print("Running, press F2 to stop, F3 to pause/resume", flush=True)
+        if start_paused:
+            print("Paused, press F3 to begin, F2 to stop,", flush=True)
+            pause_program = True
+        else:
+            print("Running, press F2 to stop, F3 to pause/resume", flush=True)
         
         start_time = time()
         last_mouse_pos = mouse.get_position()
