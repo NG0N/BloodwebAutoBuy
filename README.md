@@ -12,7 +12,7 @@ Currently only works on 1920x1080 game window
 Any possible game filters should be disabled, since they'll affect the color detection. Some detection parameters are exposed to the user.
 
 ## Installation
-Download the [latest release](https://github.com/NG0N/BloodwebAutoBuy/releases/latest/download/Bloodweb_AutoBuy_v1.0.exe), unzip, and run the `Dead by Daylight Bloodweb AutoBuy.exe`
+Download the [latest release](https://github.com/NG0N/BloodwebAutoBuy/releases/latest/download/Bloodweb_AutoBuy_v1.0.exe) and run `Dead by Daylight Bloodweb AutoBuy.exe`
 ## Manual setup
 Manual installation instructions
 
