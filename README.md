@@ -1,15 +1,15 @@
-# BloodwebAutoBuy
+# Bloodweb AutoBuy
 Automates spending bloodpoints in Dead by Daylight.
 
-Works by sampling pixels at predefined positions in the Bloodweb GUI and detecting which nodes are available to buy.
+Works by sampling pixels at predefined positions in the Bloodweb GUI and detecting which nodes are available to buy according to the pixel color.
 
 Currently only works on 1920x1080 game window
 
-* Choose between buying nodes from either inside towards the edges, or vice versa. Random order also possible.
+* Choose between buying nodes from either inside towards the edges, or vice versa. Random order also supported.
 * Set a time limit to stop progressing the Bloodweb
 * Optionally prestige automatically, or stop when completing level 50
 
-Any possible game filters should be disabled, since they'll affect the color detection, although the detection parameters are exposed for the user.
+Any possible game filters should be disabled, since they'll affect the color detection. Some detection parameters are exposed to the user.
 
 ## Installation
 Download the [latest release](https://github.com/NG0N/BloodwebAutoBuy/releases/latest/download/Dead.by.Daylight.Bloodweb.AutoBuy.zip), unzip, and run the `Dead by Daylight Bloodweb AutoBuy.exe`
@@ -39,7 +39,7 @@ pip install -r requirements.txt
 You can now run the program with:
 
 ```
-python main.py
+python src/autobuy
 ```
 
 ### Building the executable
