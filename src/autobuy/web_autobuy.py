@@ -30,11 +30,17 @@ COLOR_NODE_AVAILABLE = (156, 149, 117)
 # Color of a purchased bloodweb node edge
 COLOR_NODE_PURCHASED = (177, 4, 24)
 
-# Prestige node color table, used with PRESTIGE_SAMPLE_PTS
-COLOR_PRESTIGE = np.array([(137, 130, 132), (254, 254, 254), (202, 6, 6)], np.int32)
 
-# Position of the prestige node edge, converted to caputre region coordinates
-PRESTIGE_SAMPLE_PTS = np.array([(618, 581), (654, 598), (677,650)], np.int32)
+# Prestige node color table, used with PRESTIGE_SAMPLE_PTS_SMALL
+COLOR_PRESTIGE_SMALL = np.array([(210, 0, 1), (251, 248, 248), (205, 0, 0), (35, 1, 2)], np.int32)
+
+# Sampling positions to detect prestige node
+PRESTIGE_SAMPLE_PTS_SMALL = np.array([(677,625), (662,592), (678,540), (715, 582)], np.int32)
+
+COLOR_PRESTIGE_LARGE = np.array([(201, 6, 6),(254, 252, 252),(139, 130, 132)], np.int32)
+
+PRESTIGE_SAMPLE_PTS_LARGE = np.array([(677,651),(650, 598),(618, 581)], np.int32)
+
 
 # Hard-coded positions for all sample points in absolute coordinates on a 1920x1080 monitor, 100% in-game GUI scale
 # One array for each ring
@@ -82,12 +88,19 @@ NODE_SAMPLE_PTS = [
 for i in range(len(NODE_SAMPLE_PTS)):
     NODE_SAMPLE_PTS[i] = NODE_SAMPLE_PTS[i] - CAPTURE_POS
 
-for i in range(len(PRESTIGE_SAMPLE_PTS)):
-    PRESTIGE_SAMPLE_PTS[i] = PRESTIGE_SAMPLE_PTS[i] - CAPTURE_POS
+for i in range(len(PRESTIGE_SAMPLE_PTS_SMALL)):
+    PRESTIGE_SAMPLE_PTS_SMALL[i] = PRESTIGE_SAMPLE_PTS_SMALL[i] - CAPTURE_POS
 
-for i in range(len(COLOR_PRESTIGE)):
-    rgb = COLOR_PRESTIGE[i]
-    COLOR_PRESTIGE[i] = (rgb[2],rgb[1],rgb[0])
+for i in range(len(COLOR_PRESTIGE_SMALL)):
+    rgb = COLOR_PRESTIGE_SMALL[i]
+    COLOR_PRESTIGE_SMALL[i] = (rgb[2],rgb[1],rgb[0])
+
+for i in range(len(PRESTIGE_SAMPLE_PTS_LARGE)):
+    PRESTIGE_SAMPLE_PTS_LARGE[i] = PRESTIGE_SAMPLE_PTS_LARGE[i] - CAPTURE_POS
+
+for i in range(len(COLOR_PRESTIGE_LARGE)):
+    rgb = COLOR_PRESTIGE_LARGE[i]
+    COLOR_PRESTIGE_LARGE[i] = (rgb[2],rgb[1],rgb[0])
 
 # Calculates the chebyshev distance between two vectors, used for color comparison and mouse movement detection
 def chebyshev(a,b):
@@ -114,6 +127,9 @@ def click(pos: tuple, duration: float):
 def prestige():
     pos = CAPTURE_CENTER
     click(pos, 2.0)
+    sleep(5.0)
+    click(pos, 0.1)
+    
 
 
 # Moves the mouse out of way so no extra GUI elements are potentially drawn on top of the nodes
@@ -154,6 +170,30 @@ def on_press(key):
             print("Resumed", flush=True)
             last_mouse_pos = mouse.get_position()
 
+# Checks for two sets of prestige node templates.
+# Smaller is used when the player hasn't hovered over the prestige node yet
+def detect_prestige(img: np.ndarray, prestige_tolerance: float):
+    prestige_detected = True
+    # Check for smaller prestige node
+    for i in range(len(PRESTIGE_SAMPLE_PTS_SMALL)):
+        pos = PRESTIGE_SAMPLE_PTS_SMALL[i]
+        template_col = COLOR_PRESTIGE_SMALL[i]
+        pixel_col = get_pixel_color(img, pos)
+        if chebyshev(pixel_col, template_col) > prestige_tolerance:
+            prestige_detected = False
+            break
+            
+    if prestige_detected:
+        return True
+    
+    # Check for larger prestige node
+    for i in range(len(PRESTIGE_SAMPLE_PTS_LARGE)):
+        pos = PRESTIGE_SAMPLE_PTS_LARGE[i]
+        template_col = COLOR_PRESTIGE_LARGE[i]
+        pixel_col = get_pixel_color(img, pos)
+        if chebyshev(pixel_col, template_col) > prestige_tolerance:
+            return False
+    return True
 
 # Main program loop
 def autobuy(
@@ -250,16 +290,7 @@ def autobuy(
             if not buy_success:
                 level_bought_nodes = 0
                 # No available nodes found, check if prestige possible
-                prestige_detected = True
-                for i in range(len(PRESTIGE_SAMPLE_PTS)):
-                    pos = PRESTIGE_SAMPLE_PTS[i]
-                    template_col = COLOR_PRESTIGE[i]
-                    
-                    pixel_col = get_pixel_color(img, pos)
-                    if chebyshev(pixel_col, template_col) > prestige_tolerance:
-                        prestige_detected = False
-                        break
-                        
+                prestige_detected = detect_prestige(img, prestige_tolerance)
                 if prestige_detected:
                     print("Prestige detected", flush=True)
                     if not should_prestige:
