@@ -9,6 +9,9 @@ Automates spending bloodpoints in Dead by Daylight.
 
 Works by sampling pixels at predefined positions in the Bloodweb GUI and detecting which nodes are available to buy according to the pixel color.
 
+## Installation
+Download the [latest release](https://github.com/NG0N/BloodwebAutoBuy/releases/latest/download/BloodwebAutoBuy.zip) and run `Dead by Daylight Bloodweb AutoBuy.exe`
+
 ## Usage Guide
 Before running the program you should disable any filters that may affect the color of the game.
 The game should be in fullscreen and in 1920 by 1080 resolution. 
@@ -36,8 +39,8 @@ Disabling this option will pause the program when a prestige node is detected.
 Can be used to run the program for a set amount of time in minutes. Set to 0 to never stop automatically.
 
 
-## Installation
-
+## Manual Installation
+If you prefer to setup the program manually, follow the steps below
 ### Required:
 * Python 3.9
  
