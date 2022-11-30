@@ -2,6 +2,8 @@ from gooey import Gooey, GooeyParser
 
 from web_autobuy import Autobuy
 
+import gui_menu
+
 @Gooey(
     program_name='Bloodweb AutoBuy',
     program_description="Automated Bloodweb progression for Dead by Daylight",
@@ -16,23 +18,12 @@ from web_autobuy import Autobuy
     default_size=(600, 700),
     menu=[{
         'name': 'Help',
-        'items': [
-            {
-                'type': 'AboutDialog',
-                'menuTitle': 'About',
-                'name': 'Bloodweb AutoBuy',
-                'description': 'Automated Bloodweb progression for Dead by Daylight',
-                'version': '1.0.0',
-                'copyright': '2022',
-                'website': 'https://github.com/NG0N/BloodwebAutoBuy',
-                'license': 'MIT'
-            },
-            {
-            'type': 'Link',
-            'menuTitle': 'Documentation',
-            'url': 'https://github.com/NG0N/BloodwebAutoBuy'
+        'items': gui_menu.help_items
+    },
+    {
+        'name': 'Licenses',
+        'items': gui_menu.third_party_items
         }]
-    }]
 )
 def main():
     parser = GooeyParser()
