@@ -317,7 +317,7 @@ class Autobuy:
                 self.reset()
                 if self._verbose and self._level_bought_nodes == 4:
                     log("5th node bought, switching to longer delay mode")
-                sleep(0.305 if self._level_bought_nodes >= 5 else 0.001) # Longer delay is needed after 5th node of a level is bought
+                sleep(0.305 if self._level_bought_nodes >= 4 else 0.001) # Longer delay is needed after 5th node of a level is bought
                 self._level_bought_nodes += 1
                 return True
         return False
