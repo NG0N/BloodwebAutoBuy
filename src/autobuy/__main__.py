@@ -1,6 +1,6 @@
 from gooey import Gooey, GooeyParser
 
-from web_autobuy import autobuy
+from web_autobuy import Autobuy
 
 @Gooey(
     program_name='Bloodweb AutoBuy',
@@ -104,23 +104,24 @@ def main():
         
     args = parser.parse_args()
 
-    ordering = ""
+    ordering = Autobuy.Ordering.DEFAULT
     if args.shuffle:
-        ordering = "shuffle"
+        ordering = Autobuy.Ordering.SHUFFLE
     elif args.reverse:
-        ordering = "reverse"
+        ordering = Autobuy.Ordering.REVERSE
         
     # Run the main program
-    autobuy(
-            start_paused = bool(args.start_paused),
-            verbose = bool(args.verbose), 
-            monitor_index = int(args.monitor_index), 
-            time_limit = float(args.time_limit) * 60.0, 
-            should_prestige = bool(args.should_prestige), 
-            ordering = ordering, 
-            node_tolerance = int(args.node_color_threshold), 
-            prestige_tolerance = int(args.prestige_color_threshold), 
-            color_available = tuple(bytes.fromhex(args.ring_color[1:])))
-
+    autobuy = Autobuy()
+    autobuy.set_start_paused(bool(args.start_paused))
+    autobuy.set_verbose(bool(args.verbose))
+    autobuy.set_monitor_index(int(args.monitor_index))
+    autobuy.set_time_limit(float(args.time_limit) * 60.0)
+    autobuy.set_auto_prestige(bool(args.should_prestige))
+    autobuy.set_ordering(ordering)
+    autobuy.set_node_tolerance(int(args.node_color_threshold))
+    autobuy.set_prestige_tolerance(int(args.prestige_color_threshold))
+    autobuy.set_color_available(tuple(bytes.fromhex(args.ring_color[1:])))
+    autobuy.run()
+    
 if __name__ == "__main__":
     main()
