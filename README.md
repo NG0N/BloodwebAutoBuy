@@ -10,7 +10,7 @@ Automates spending bloodpoints in Dead by Daylight.
 Works by sampling pixels at predefined positions in the Bloodweb GUI and detecting which nodes are available to buy according to the pixel color.
 
 ## Installation
-Download the [latest release](https://github.com/NG0N/BloodwebAutoBuy/releases/latest/download/BloodwebAutoBuy.zip) and run `Dead by Daylight Bloodweb AutoBuy.exe`
+Download the [latest release](https://github.com/NG0N/BloodwebAutoBuy/releases/latest/download/BloodwebAutoBuy.zip) and run `Bloodweb AutoBuy.exe`
 
 ## Usage Guide
 Before running the program you should disable any filters that may affect the color of the game.
