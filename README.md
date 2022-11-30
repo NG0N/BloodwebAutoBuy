@@ -9,11 +9,6 @@ Automates spending bloodpoints in Dead by Daylight.
 
 Works by sampling pixels at predefined positions in the Bloodweb GUI and detecting which nodes are available to buy according to the pixel color.
 
-Any possible game filters should be disabled, since they'll affect the color detection. Some detection parameters are exposed to the user.
-
-## Installation
-Download the [latest release](https://github.com/NG0N/BloodwebAutoBuy/releases/latest/download/BloodwebAutoBuy.exe) and run `Dead by Daylight Bloodweb AutoBuy.exe`
-
 ## Usage Guide
 Before running the program you should disable any filters that may affect the color of the game.
 The game should be in fullscreen and in 1920 by 1080 resolution. 
@@ -41,8 +36,7 @@ Disabling this option will pause the program when a prestige node is detected.
 Can be used to run the program for a set amount of time in minutes. Set to 0 to never stop automatically.
 
 
-## Manual setup
-If you prefer to setup the program manually, follow the steps below
+## Installation
 
 ### Required:
 * Python 3.9
@@ -76,7 +70,7 @@ pip install pyinstaller
 pyinstaller .\build.spec
 ```
 
-The resulting directory with the executable will be in `dist/`
+The resulting executable will be in the `dist/` directory
 
 *Note:* Due to [Gooey Issue #149](https://github.com/chriskiehl/Gooey/issues/149) the custom program icons in the `data/` directory won't show up in the packaged build. A temporary workaround is to copy and replace the images in `.venv/Lib/site-packages/gooey/images` with the images from the `data/` directory before building.
 
@@ -85,4 +79,4 @@ The resulting directory with the executable will be in `dist/`
 * [Gooey](https://github.com/chriskiehl/Gooey): GUI library
 * [mouse](https://github.com/boppreh/mouse): Mouse event simulation
 * [keyboard](https://github.com/boppreh/keyboard): Hotkey events
-* [NumPy](https://numpy.org/): Image data arrays
+* [NumPy](https://numpy.org): Image data arrays
