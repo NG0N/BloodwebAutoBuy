@@ -3,7 +3,7 @@ from copy import deepcopy
 from time import sleep, time
 import mss.tools
 import numpy as np
-from pynput import keyboard
+import keyboard
 import mouse
 
 
@@ -119,7 +119,7 @@ class Autobuy:
     
     ## Options ##
     _start_paused : bool = False
-    _verbose : bool = True
+    _verbose : bool = False
     _time_limit : float = 0
     _auto_prestige : bool = True
     _ordering : Ordering = Ordering.DEFAULT
@@ -151,7 +151,7 @@ class Autobuy:
     def __init__(self) -> None:
         # Initialize mss library
         self._sct = mss.mss()
-        self.set_monitor_index(2)
+        self.set_monitor_index(1)
         self.set_color_available(COLOR_NODE_AVAILABLE)
         self.set_color_purchased(COLOR_NODE_PURCHASED)
     
@@ -248,21 +248,23 @@ class Autobuy:
             return True
         return False
 
-    # Keyboard callback
-    def on_press(self, key):
-        # Only stop with ESC if not paused
-        if key == keyboard.Key.f2 or (key == keyboard.Key.esc and not self._pause_program):
+
+    def _stop(self):
+        self._stop_program = True
+
+    def _stop_if_paused(self):
+        if not self._pause_program:
             self._stop_program = True
-            return False
-        elif key in [keyboard.Key.f3]:
-            self._pause_program = not self._pause_program
-            if self._pause_program:
-                log("Paused, press F3 to resume")
-            else:
-                log("Resumed")
-                self._last_mouse_pos = mouse.get_position()
 
 
+    def _toggle_pause(self):
+        self._pause_program = not self._pause_program
+        if self._pause_program:
+            log("Paused, press F3 to resume")
+        else:
+            log("Resumed")
+            self._last_mouse_pos = mouse.get_position()
+    
     # Checks for two sets of prestige node templates.
     # Smaller is used when the player hasn't hovered over the prestige node yet
     def detect_prestige(self, img: np.ndarray, _prestige_tolerance: float) -> bool:
@@ -390,10 +392,9 @@ class Autobuy:
         else:
             log("Running, press F2 to stop, F3 to pause/resume")
             
-        on_press_func = lambda key: self.on_press(key)
-        # Initialize punpyt and start listening for pause and stop commands
-        kb_listener = keyboard.Listener(on_press=on_press_func)
-        kb_listener.start()
+        keyboard.add_hotkey('f3', lambda: self._toggle_pause())
+        keyboard.add_hotkey('f2', lambda: self._stop())
+        keyboard.add_hotkey('esc', lambda: self._stop_if_paused())
         
         
         # Wrap in try/finally to make sure kb_listener thread is always stopped
@@ -403,8 +404,6 @@ class Autobuy:
              # Main loop ended, print out the time stats
             log(f"Stopping, ran for {self._get_run_duration_string()}")
 
-            # Cleanup
-            kb_listener.stop()
             
 
 

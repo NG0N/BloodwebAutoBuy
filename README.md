@@ -84,3 +84,4 @@ The resulting directory with the executable will be in `dist/`
 * [python-mss](https://github.com/BoboTiG/python-mss): Screen capture
 * [Gooey](https://github.com/chriskiehl/Gooey): GUI library
 * [mouse](https://github.com/boppreh/mouse): Mouse event simulation
+* [keyboard](https://github.com/boppreh/keyboard): Hotkey events
