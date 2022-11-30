@@ -12,7 +12,7 @@ Works by sampling pixels at predefined positions in the Bloodweb GUI and detecti
 Any possible game filters should be disabled, since they'll affect the color detection. Some detection parameters are exposed to the user.
 
 ## Installation
-Download the [latest release](https://github.com/NG0N/BloodwebAutoBuy/releases/latest/download/Bloodweb_AutoBuy_v1.0.exe) and run `Dead by Daylight Bloodweb AutoBuy.exe`
+Download the [latest release](https://github.com/NG0N/BloodwebAutoBuy/releases/latest/download/BloodwebAutoBuy.exe) and run `Dead by Daylight Bloodweb AutoBuy.exe`
 
 ## Usage Guide
 Before running the program you should disable any filters that may affect the color of the game.
