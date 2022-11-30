@@ -85,3 +85,4 @@ The resulting directory with the executable will be in `dist/`
 * [Gooey](https://github.com/chriskiehl/Gooey): GUI library
 * [mouse](https://github.com/boppreh/mouse): Mouse event simulation
 * [keyboard](https://github.com/boppreh/keyboard): Hotkey events
+* [NumPy](https://numpy.org/): Image data arrays
