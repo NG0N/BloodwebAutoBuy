@@ -158,10 +158,11 @@ class WebAnalyzer:
         return img
 
 
+    # Returns the node position in absolute coordinates
     def get_node_position(self, node: int) -> tuple:
         if node < 0:
-            return self._center_pos - self._game_window.position
-        return self._web_nodes[node] - self._game_window.position
+            return self._center_pos + self._game_window.position
+        return self._web_nodes[node] + self._game_window.position
     
     # Takes a screen capture, samples the node positions, sorts by rarity, most common first
     # 0-29 are normal nodes, -1 is prestige node
@@ -172,7 +173,7 @@ class WebAnalyzer:
         # Convert to python int tuple for MSS
         capture_bbox = (bbox[0][0].item(), bbox[0][1].item(), bbox[1][0].item(), bbox[1][1].item())
         image = self.capture(capture_bbox)
-                        
+
         rim_positions = self._web_points - bbox[0]
         samples = image[rim_positions[:,1],rim_positions[:,0]]
         dists = np.linalg.norm(np.subtract(samples, self._color_node_available), axis=1)
@@ -389,6 +390,9 @@ class WebAnalyzer:
         self._web_bbox = (min.astype(int), max.astype(int) + 1)
 
 
+    def get_mouse_idle_pos(self) -> np.ndarray[int]:
+        return self._game_window.position + self._web_bbox[0]
+    
     def _update_game_window_info(self):
         self._game_window = None
         # If set, override the window with the given monitor index

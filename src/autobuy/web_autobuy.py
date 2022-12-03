@@ -21,7 +21,7 @@ class Autobuy:
     
     ## Options ##
     _start_paused : bool = False
-    _verbose : bool = False
+    _verbose : bool = True
     _time_limit : float = 0
     _auto_prestige : bool = True
     _ordering : Ordering = Ordering.SHUFFLE
@@ -90,14 +90,12 @@ class Autobuy:
     # Automatically click at the prestige icon for the right duration
     def prestige(self) -> None:
         pos = self.web_analyzer.get_node_position(-1)
-        self.click(pos, 1.0)
+        self.click(pos, 2.0)
         sleep(5.0)
         self.click(pos, 0.1)
 
     # Moves the mouse out of way so no extra GUI elements are potentially drawn on top of the nodes
     def _reset(self) -> None:
-        if self.check_for_mouse_pause():
-            return
         mouse.move(self._idle_mouse_pos[0], self._idle_mouse_pos[1])
         self._last_mouse_pos = self._idle_mouse_pos
         
@@ -145,7 +143,7 @@ class Autobuy:
             self.prestige()
         clickpos = self.web_analyzer.get_node_position(node)
         if self._verbose:
-            log(f"Buying node {node}")
+            log(f"  Buying node {node}")
 
         required_delay = 0.36 if self._level_bought_nodes >= 4 else 0.0166666667
         diff = (perf_counter() - self._time_last_bought)
@@ -182,22 +180,21 @@ class Autobuy:
             #if self._ordering == self.Ordering.SHUFFLE:
             #    np.random.shuffle(nodes)
                 
-            # Move mouse out of the way
-            self._reset() 
+            
             self._try_buy()
             
 
 
     def _try_buy(self):
-        
-
+        # Move mouse out of the way
+        self._reset() 
         nodes = self.web_analyzer.find_buyable_nodes()
         if nodes is None:
             
             self._level_bought_nodes = 0
             # Prevent repeating
             if self._verbose and not self._found_none_prev:
-                log("Nothing detected")
+                log("   Nothing detected")
             self._found_none_prev = True
             # Add a small delay between loops to allow for the level up animation to play
             sleep(0.5)
@@ -228,9 +225,10 @@ class Autobuy:
     
     # Start buying the bloodweb nodes
     def run(self) -> None:
+        self.web_analyzer.initialize()
+        idle_pos = self.web_analyzer.get_mouse_idle_pos()
+        self._idle_mouse_pos = (idle_pos[0], idle_pos[1])
 
-        
-        
         if self._start_paused:
             log("Paused, press F3 to begin, F2 to stop")
             self._pause_program = True
