@@ -423,7 +423,7 @@ class WebAnalyzer:
         w = rect[2] - x
         h = rect[3] - y
         name = win32gui.GetWindowText(hwnd).strip()
-        if name != "DeadByDaylighst":
+        if name != "DeadByDaylight":
             return
         self._game_window = GameWindow(hwnd, np.array([x,y], int), np.array([w,h], int))
         print("Game window found automatically", flush=True)
