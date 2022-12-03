@@ -1,9 +1,9 @@
 # Bloodweb AutoBuy
 Automates spending bloodpoints in Dead by Daylight.
 
-**Currently only works on 1920x1080 fullscreen game window**
+**Support added for common resolutions!**
 
-* Choose between buying nodes from either inside towards the edges, or vice versa. Random order also supported.
+* Choose whether you want to buy rare or common nodes first
 * Set a time limit to stop progressing the Bloodweb
 * Optionally prestige automatically, or stop when completing level 50
 
@@ -14,22 +14,38 @@ Download the [latest release](https://github.com/NG0N/BloodwebAutoBuy/releases/l
 
 ## Usage Guide
 Before running the program you should disable any filters that may affect the color of the game.
-The game should be in fullscreen and in 1920 by 1080 resolution. 
-**UI Scale** in the in-game **Graphics settings**  should also be set to the default 100%
+The game should be in fullscreen and the **UI Scale** in the in-game **Graphics settings**  should be set to the default 100%.
+
+Pressing start will bring up the game window and the program will start buying the currently open Bloodweb, from the cheapest available nodes to the rarest by default.
+
+
+
 ### Hotkeys
 - **F3**: Pause/Resume
 - **F2 / ESC**: Quit
 
 Moving your mouse will also pause the program
 
-### Options
+### Supported resolutions
+|w × h       |  
+| -----------|
+|3840 × 2160 |
+|2560 × 1600 |
+|2560 × 1440 |
+|1920 × 1080 |
+|1680 × 1050 |
+|1366 × 768  |
+
+## Options
 #### Monitor Index
-Determines which monitor the game is captured from, 1 being the primary monitor.
+Only needed if the game window cannot be detected automatically. Determines which monitor the game is captured from, 1 being the primary monitor. Set to 0 to let the program try to find the window automatically.
+#### Bring window to foreground
+When on, the game window will be brought into the foreground to make sure no other windows are blocking the capture.
 #### Start Paused
 Running the program with this setting enabled will cause the program to begin in a paused state. Pressing F3 will unpause.
-#### Buy closest nodes first
-By default the program will buy the furthest node from the center available.
-Choosing this option will invert this behaviour, meaning that the inner rings are bought first.
+#### Buy the most expensive nodes first
+By default the program will buy the most common nodes first, determined by their color.
+Choosing this option will invert this behaviour, causing rare nodes to be bought first.
 #### Randomize order
 The nodes will be bought in a random order
 #### Auto-Prestige
@@ -83,3 +99,5 @@ The resulting executable will be in the `dist/` directory
 * [mouse](https://github.com/boppreh/mouse): Mouse event simulation
 * [keyboard](https://github.com/boppreh/keyboard): Hotkey events
 * [NumPy](https://numpy.org): Image data arrays
+* [pywin32](https://github.com/mhammond/pywin32): Automatic game window hooking
+* [Pillow](https://python-pillow.org/): Debug image manipulation 
