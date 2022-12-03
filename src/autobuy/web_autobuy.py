@@ -230,7 +230,7 @@ class Autobuy:
     def run(self) -> None:
         try:
             self.web_analyzer.initialize()
-        except WebAnalyzer.GameResolutionError:
+        except (WebAnalyzer.GameResolutionError, WebAnalyzer.WindowNotFoundError):
             print("Failed to initialize", flush=True)
             return
         
