@@ -1,3 +1,12 @@
+options_group_desc = """Moving your mouse or pressing F3 will pause the program, press F3 again to resume.
+Press Esc or F2 to stop the program at any point.
+Make sure that the game is in fullscreen mode and that the GUI scale is set to 100%."""
+
+advanced_group_desc = """Customize the color detection parameters, might be required if you use strong filters. Disabling filters temporarily instead is probably easier.
+If your monitor resolution is unsupported, you can calibrate the sample points yourself:
+Supply the X and Y pixel coordinates of the Bloodweb center pooint, relative to the game window's top left corner
+Use the 'Save test images' setting with the Bloodweb open to test the alignment"""
+
 
 help_items = [
 {
