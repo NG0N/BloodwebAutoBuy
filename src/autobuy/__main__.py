@@ -7,19 +7,20 @@ import gui_menu
 from web_analyzer import WebAnalyzer
 
 @Gooey(
-    program_name='Bloodweb AutoBuy',
-    program_description='Automated Bloodweb progression for Dead by Daylight',
-    image_dir=local_resource_path('data/images'),
-    body_bg_color='#FFFFFF',
-    header_bg_color='#C9B899',
+    program_name = 'Bloodweb AutoBuy',
+    program_description = 'Automated Bloodweb progression for Dead by Daylight',
+    image_dir = local_resource_path('data/images'),
+    body_bg_color = '#FFFFFF',
+    header_bg_color = '#C9B899',
     show_success_modal = False,
-    footer_bg_color='#717E92',
-    tabbed_groups=True,
-    show_stop_warning=False,
-    force_stop_is_error=False,
-    show_sidebar=False,
+    footer_bg_color = '#717E92',
+    tabbed_groups = True,
+    show_stop_warning = False,
+    force_stop_is_error = False,
+    show_sidebar = False,
     clear_before_run = True,
-    default_size=(600, 700),
+    default_size = (600, 700),
+    richtext_controls = True,
     menu=[{
         'name': 'Help',
         'items': gui_menu.help_items
@@ -63,13 +64,6 @@ def main():
                         metavar='Start Paused',
                         action='store_true', 
                         help='Start the program in the paused state. Pressing F3 is required to start.')
-        
-        
-    options_group.add_argument('-m', '--monitor_index',
-                        default=0,
-                        metavar='Monitor index',
-                        help='Leave to 0 to let the game window be found automatically.',
-                        widget='IntegerField')
     
     options_group.add_argument('-w', '--activate_window',
                         default=True,
@@ -84,7 +78,15 @@ def main():
                         widget='DecimalField',
                         help='Stop after this duration (minutes), Set to 0 to disable limit.')
     
-        
+    options_group.add_argument('-m', '--monitor_index',
+                        default=0,
+                        metavar='Monitor index',
+                        help='Leave to 0 to let the game window be found automatically.',
+                        widget='IntegerField',
+                        gooey_options = {
+                            'min' : 0, 
+                            'max' : 63, 
+                            'increment' : 1})
     
     
     advanced_group.add_argument('--ring_color',
@@ -103,7 +105,6 @@ def main():
                             'max' : 100, 
                             'increment' : 1})
 
-    
    
     advanced_group.add_argument('--unsupported_resolution_mid_x',
                         metavar='For unsupported resolutions: Midpoint X',

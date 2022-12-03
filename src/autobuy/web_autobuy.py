@@ -5,10 +5,14 @@ import keyboard
 import mouse
 from web_analyzer import WebAnalyzer
 from random import randrange
+from colored import stylize, attr, fg
 
 # Position to move the mouse while waiting
 IDLE_MOUSE_POS = (255, 124)
 
+
+PAUSE_COLOR = fg('yellow_3b')
+RUNNING_COLOR = fg('spring_green_4')
 # Logs with flushing enabled to make Gooey log window work
 def log(msg):
     print(msg, flush=True)
@@ -104,7 +108,7 @@ class Autobuy:
         mouse_pos = mouse.get_position()
         moved_dist = max(abs(self._last_mouse_pos[0] - mouse_pos[0]),abs(self._last_mouse_pos[1] - mouse_pos[1]))
         if not self._pause_program and moved_dist > 3:
-            log("Paused on mouse move, press F3 to resume")
+            log(stylize("Paused, F3: Resume", PAUSE_COLOR))
             self._pause_program = True
             return True
         return False
@@ -121,9 +125,9 @@ class Autobuy:
     def _toggle_pause(self):
         self._pause_program = not self._pause_program
         if self._pause_program:
-            log("Paused, press F3 to resume")
+            log(stylize("Paused, F2: Stop, F3: Resume", PAUSE_COLOR))
         else:
-            log("Resumed")
+            log(stylize("Resumed, F2: Stop, F3: Pause", RUNNING_COLOR))
             self._last_mouse_pos = mouse.get_position()
     
 
@@ -214,9 +218,9 @@ class Autobuy:
             return
         # Prestige node
         self._level_bought_nodes = 0
-        log("Prestige detected")
+        log(stylize("Prestige detected", attr("bold")))
         if node == -1 and not self._auto_prestige:
-            log("Paused on prestige")
+            log(stylize("Paused on prestige", PAUSE_COLOR))
             self._pause_program = True
             return
         self._buy_node(node)
@@ -224,20 +228,22 @@ class Autobuy:
     
     # Start buying the bloodweb nodes
     def run(self) -> None:
-        print("\n-------- Running Autobuy --------\n")
         try:
             self.web_analyzer.initialize()
         except WebAnalyzer.GameResolutionError:
             print("Failed to initialize", flush=True)
             return
+        
+        print("\n---- Running Autobuy ----")
+
         idle_pos = self.web_analyzer.get_mouse_idle_pos()
         self._idle_mouse_pos = (idle_pos[0], idle_pos[1])
 
         if self._start_paused:
-            log("Paused, press F3 to begin, F2 to stop")
+            log(stylize("F3: Begin, F2: Stop", PAUSE_COLOR))
             self._pause_program = True
         else:
-            log("Running, press F2 to stop, F3 to pause/resume")
+            log(stylize("F2: Stop, F3: Pause/Resume", RUNNING_COLOR))
             
         keyboard.add_hotkey('f3', lambda: self._toggle_pause())
         keyboard.add_hotkey('f2', lambda: self._stop())
