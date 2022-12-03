@@ -4,6 +4,8 @@ from web_autobuy import Autobuy
 
 import gui_menu
 
+from web_analyzer import WebAnalyzer
+
 @Gooey(
     program_name='Bloodweb AutoBuy',
     program_description="Automated Bloodweb progression for Dead by Daylight",
@@ -34,7 +36,10 @@ Press Esc or F2 to stop the program at any point.
 Make sure that the game is in fullscreen mode and that the GUI scale is set to 100%.""")
     advanced_group = parser.add_argument_group(
     "Advanced", 
-    "Customize the color detection parameters, might be required if you use strong filters. Disabling filters temporarily instead is probably easier.")
+    """Customize the color detection parameters, might be required if you use strong filters. Disabling filters temporarily instead is probably easier.
+If your monitor resolution is unsupported, you can calibrate the sample points yourself
+All you have to do is to supply the X and Y pixel coordinates of the bloodweb center
+Use the debug with the Bloodweb open to see the results""")
     
     
     options_group.add_argument('-m', '--monitor_index',
@@ -97,8 +102,38 @@ Make sure that the game is in fullscreen mode and that the GUI scale is set to 1
                                 metavar='Verbose output',
                                 action="store_true", 
                                 help="""Print debug info.""")
-        
+    
+    advanced_group.add_argument('--unsupported_resolution_debug',
+                                metavar='For unsupported resolutions: Save test images',
+                                default=False,
+                                action="store_true", 
+                                help="""Turn on to save test images to preview the custom midpoint. Files beginnning with BAB_<x>_<y> will be saved on the desktop.""",
+                                widget="BlockCheckbox")
+    
+    
+    advanced_group.add_argument('--unsupported_resolution_mid_x',
+                                metavar='For unsupported resolutions: Midpoint X',
+                                default=0,
+                                help="""X coordinate of the Bloodweb midpoint"""
+                                )
+                                
+
+    advanced_group.add_argument('--unsupported_resolution_mid_y',
+                                metavar='For unsupported resolutions: Midpoint Y',
+                                default=0,
+                                help="""X coordinate of the Bloodweb midpoint""")
+
+
     args = parser.parse_args()
+
+    if args.unsupported_resolution_debug:
+        analyzer = WebAnalyzer()
+        analyzer.set_override_monitor_index(int(args.monitor_index))
+        analyzer.set_custom_midpoint(int(args.unsupported_resolution_mid_x), int(args.unsupported_resolution_mid_y))
+        analyzer.initialize()
+        analyzer.save_debug_images()
+        return
+
 
     ordering = Autobuy.Ordering.CHEAP
     if args.shuffle:
@@ -116,6 +151,7 @@ Make sure that the game is in fullscreen mode and that the GUI scale is set to 1
     autobuy.web_analyzer.set_override_monitor_index(int(args.monitor_index))
     autobuy.web_analyzer.set_node_tolerance(int(args.node_color_threshold))
     autobuy.web_analyzer.set_color_available(tuple(bytes.fromhex(args.ring_color[1:])))
+    autobuy.web_analyzer.set_custom_midpoint(int(args.unsupported_resolution_mid_x), int(args.unsupported_resolution_mid_y))
     autobuy.web_analyzer.initialize()
     autobuy.run()
     

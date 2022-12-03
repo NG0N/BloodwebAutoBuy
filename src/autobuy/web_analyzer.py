@@ -3,6 +3,8 @@ import mss, mss.tools
 import win32gui
 from time import sleep
 from enum import IntEnum
+from PIL import Image, ImageDraw
+from pathlib import Path
 
 class GameWindow:
     handle : int
@@ -34,8 +36,7 @@ SAMPLE_COUNT_SMALL_PRESTIGE = 4
 SAMPLE_COUNT_LARGE_PRESTIGE = 3
 
 COLOR_PRESTIGE_SMALL = np.array([[1, 0, 210], [248, 248, 251], [0, 0, 205], [53, 47, 40]], int)
-COLOR_PRESTIGE_LARGE = np.array([[6, 6, 201], [252, 252, 254], [56, 54, 53]], int)
-
+COLOR_PRESTIGE_LARGE = np.array([[6, 6, 201], [252, 252, 254], [55, 55, 50]], int)
 
 
 class Rarity(IntEnum):
@@ -80,6 +81,7 @@ class WebAnalyzer:
     _game_window: GameWindow
     
     _override_monitor_index = 0
+    _custom_midpoint = None
     
     # Sampling points in game window space
     _sample_points: np.ndarray[np.ndarray[int]]
@@ -105,7 +107,7 @@ class WebAnalyzer:
     _center_pos : np.ndarray[int]
     
     class GameResolutionError(Exception):
-        pass
+        resolution: str
     class WindowNotFoundError(Exception):
         pass
     
@@ -122,7 +124,7 @@ class WebAnalyzer:
         try:
             self._import_points(points_file, tuple(self._game_window.size))
         except self.GameResolutionError as err:
-            print("Unsupported resolution")
+            print(f"Unsupported resolution: {err.resolution}, You can manually calibrate in the program settings", flush=True)
             raise err
         except IOError as err:
             print(f"Failed to import sample points in file {points_file}", flush=True)
@@ -138,6 +140,10 @@ class WebAnalyzer:
 
     def set_override_monitor_index(self, index: int) -> None:
         self._override_monitor_index = index
+    
+    def set_custom_midpoint(self, x: int, y: int):
+        self._custom_midpoint = np.array([x,y],int)
+        
         
     # Captures a screenshot
     # bbox is start and end positions. Game window position offset is added here
@@ -222,8 +228,8 @@ class WebAnalyzer:
         sample_positions = self._small_prestige_points - bbox[0]
         samples = image[sample_positions[:,1],sample_positions[:,0]]
         diffs = np.subtract(samples, COLOR_PRESTIGE_SMALL)
-        dists = np.linalg.norm(diffs, axis=0)
-        if np.max(dists, axis=0) < self._color_tolerance:
+        dists = np.linalg.norm(diffs, axis=1)
+        if np.max(dists, axis=0) < self._color_tolerance * 1.2:
             return [-1]
 
         # Check for large prestige node
@@ -231,7 +237,7 @@ class WebAnalyzer:
         samples = image[sample_positions[:,1],sample_positions[:,0]]
         diffs = np.subtract(samples, COLOR_PRESTIGE_LARGE)
         dists = np.linalg.norm(diffs, axis=0)
-        if np.max(dists, axis=0) < self._color_tolerance:
+        if np.max(dists, axis=0) < self._color_tolerance * 1.3:
             return [-1]
         
     # Find minimum angle difference in hue    
@@ -294,7 +300,7 @@ class WebAnalyzer:
         im = Image.fromarray(rgb)
         
         pts_groups = {
-            "web" : self._web_points,
+            "edges" : self._web_points,
             "nodes" : self._web_nodes,
             "prestige_small" : self._small_prestige_points,
             "prestige_large" : self._large_prestige_points,
@@ -302,7 +308,7 @@ class WebAnalyzer:
         
         # Color of the mask outline
         group_colors = {
-            "web" : (128,128,128),
+            "edges" : (128,128,128),
             "nodes": (255,0,0,90),
             "prestige_small" : (0,255,0),
             "prestige_large" : (0,255,255),
@@ -347,12 +353,16 @@ class WebAnalyzer:
                 print(f"Failed to read resolution file {resolution_file}", flush=True)
                 raise err
             
-            ref_center = center_points[REF_RESOLUTION]
-            if not resolution in center_points:
-                raise self.GameResolutionError("Unsupported game window resolution: {resolution}")
-            # This is stored for prestiging
-            self._center_pos = center_points[resolution]
+            has_custom_midpoint = self._custom_midpoint is not None
             
+            ref_center = center_points[REF_RESOLUTION]
+            if not resolution in center_points and not has_custom_midpoint:
+                raise self.GameResolutionError(resolution.tostring())
+            # This is stored for prestiging
+            self._center_pos = center_points[resolution] 
+            if has_custom_midpoint:
+                self._center_pos = self._custom_midpoint
+                print(f"Using custom midpoint {self._custom_midpoint}", flush=True)
             # Remove web position from the points so they are centered around [0,0]
             local_pts = (self._sample_points - ref_center).astype(np.float64)
             # Scale according to game window width
@@ -413,12 +423,23 @@ class WebAnalyzer:
         except Exception as err:
             #SetForegroundWindow seems to fail randomly
             pass
-            
+    
+    def save_debug_images(self):
+        x = self._custom_midpoint[0]
+        y = self._custom_midpoint[1]
         
+        edges_filename = f"BAB_{x}_{y}_edges.png"
+        nodes_filename = f"BAB_{x}_{y}_nodes.png"
+        
+        desktop = Path.home() / "Desktop"
+        print("Saving preview images for custom midpoint...", flush=True)
+        self.debug_draw_points(desktop / edges_filename, ["edges"])
+        self.debug_draw_points(desktop / nodes_filename, ["nodes"])
+        print(f"Done! Files created:\n{desktop / edges_filename}\n{desktop / nodes_filename}",flush=True)
+    
     
 if __name__ == "__main__":
-    from PIL import Image, ImageDraw
     analyzer = WebAnalyzer()
-    #analyzer.debug_draw_points(f"out_{self._game_window.size}.png", ["web"])
     analyzer.initialize()
-    print(analyzer.find_buyable_nodes())
+    analyzer.debug_draw_points(f"out_{analyzer._game_window.size}.png", ["nodes"])
+    #print(analyzer.find_buyable_nodes())
