@@ -5,7 +5,8 @@ from time import sleep
 from enum import IntEnum
 from PIL import Image, ImageDraw
 from pathlib import Path
-
+import sys
+from os import getcwd
 class GameWindow:
     handle : int
     position : np.ndarray[int]
@@ -121,8 +122,14 @@ class WebAnalyzer:
     
     # Manual initialization is needed for monitor override
     def initialize(self):
-        self._update_game_window_info()        
-        points_file = "data/2560x1440.csv"
+        self._update_game_window_info()
+        
+        try:
+            wd = sys._MEIPASS
+        except AttributeError:
+            wd = getcwd()
+        
+        points_file = Path(wd) / "data" / "2560x1440.csv"
         try:
             self._import_points(points_file, tuple(self._game_window.size))
         except self.GameResolutionError as err:
@@ -347,11 +354,14 @@ class WebAnalyzer:
     # Imports points from a file, transforming them to the correct scaling according to the _center_points table
     def _import_points(self, filename: str, resolution: tuple[int,int] = None) -> np.ndarray:
         self._sample_points = np.loadtxt(filename, dtype=int, delimiter=",", comments="#")
-        
         # Transform points if needed
         if resolution != REF_RESOLUTION:
             # Read web center points for different resolutions from a file
-            resolution_file = "data/resolutions.txt"
+            try:
+                wd = sys._MEIPASS
+            except AttributeError:
+                wd = getcwd()
+            resolution_file =  Path(wd) / "data" / "resolutions.txt"   
             try:
                 center_points = self._parse_resolution_info(resolution_file)
             except Exception as err:

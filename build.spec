@@ -2,10 +2,16 @@
 
 my_root = os.getcwd()
 
+added_files = [
+    ('data/2560x1440.csv','data'),
+    ('data/resolutions.txt', 'data')
+]
+
 a = Analysis(['src/autobuy/__main__.py'],
              pathex=['.venv/Lib/site-packages'],
              hiddenimports=[],
              hookspath=None,
+             datas=added_files,
              runtime_hooks=None,
              )
              
