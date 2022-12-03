@@ -122,7 +122,8 @@ class WebAnalyzer:
     
     # Manual initialization is needed for monitor override
     def initialize(self):
-        print("\n---- Initializing ----\n")
+        print("\n---- Initializing ----")
+        
         self._update_game_window_info()
         
         try:
@@ -133,7 +134,7 @@ class WebAnalyzer:
         points_file = Path(wd) / "data" / "2560x1440.csv"
         try:
             self._import_points(points_file, tuple(self._game_window.size))
-        except self.GameResolutionError as err:
+        except WebAnalyzer.GameResolutionError as err:
             print(f"Unsupported resolution: {err.resolution}, You can manually calibrate the web midpoint in the advanced settings", flush=True)
             raise err
         except IOError as err:
@@ -371,7 +372,7 @@ class WebAnalyzer:
             has_custom_midpoint = self._custom_midpoint is not None
             ref_center = center_points[REF_RESOLUTION]
             if not resolution in center_points and not has_custom_midpoint:
-                err = self.GameResolutionError("Unsupported resolution")
+                err = WebAnalyzer.GameResolutionError("Unsupported resolution")
                 try:
                     err.resolution = (str(resolution[0]),str(resolution[1]))
                 except:
@@ -416,7 +417,8 @@ class WebAnalyzer:
         self._game_window = None
         # If set, override the window with the given monitor index
         if self._override_monitor_index > 0:
-            monitor = self._sct.monitors[self._override_monitor_index]
+            index = min(self._override_monitor_index, len(self._sct.monitors) - 1)
+            monitor = self._sct.monitors[index]
             self._game_window = GameWindow(None,
                                            np.array([monitor["left"], monitor["top"]], int),
                                            np.array([monitor["width"], monitor["height"]], int))
@@ -452,7 +454,7 @@ class WebAnalyzer:
             pass
     
     def save_debug_images(self):
-        print("\n---- Starting custom resolution tester ----\n")
+        print("\n---- Starting custom resolution tester ----")
         x = self._custom_midpoint[0]
         y = self._custom_midpoint[1]
         
