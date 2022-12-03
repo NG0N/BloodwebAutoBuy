@@ -37,7 +37,7 @@ SAMPLE_COUNT_SMALL_PRESTIGE = 4
 SAMPLE_COUNT_LARGE_PRESTIGE = 3
 
 COLOR_PRESTIGE_SMALL = np.array([[1, 0, 210], [248, 248, 251], [0, 0, 205], [53, 47, 40]], int)
-COLOR_PRESTIGE_LARGE = np.array([[6, 6, 201], [252, 252, 254], [55, 55, 50]], int)
+COLOR_PRESTIGE_LARGE = np.array([[6, 6, 201], [250, 250, 250], [55, 55, 50]], int)
 
 
 class Rarity(IntEnum):
@@ -218,12 +218,12 @@ class WebAnalyzer:
         r = means[:,2]
         g = means[:,1]
         b = means[:,0]
-        max = np.max([r,g,b],axis=0)
-        min = np.min([r,g,b],axis=0)
+        max_c = np.max([r,g,b],axis=0)
+        min_c = np.min([r,g,b],axis=0)
                 
-        hue = np.array([(g-b)/(max-min),
-            2.0 + ((b-r) / (max-min)),
-            4.0 + ((r-g) / (max-min))])
+        hue = np.array([(g-b)/(max_c-min_c),
+            2.0 + ((b-r) / (max_c-min_c)),
+            4.0 + ((r-g) / (max_c-min_c))])
         indices = np.argmax([r,g,b],axis=0)
         hue = np.choose(indices,hue)
         hue *= 60
@@ -250,7 +250,7 @@ class WebAnalyzer:
         samples = image[sample_positions[:,1],sample_positions[:,0]]
         diffs = np.subtract(samples, COLOR_PRESTIGE_LARGE)
         dists = np.linalg.norm(diffs, axis=0)
-        if np.max(dists, axis=0) < self._color_tolerance * 1.3:
+        if np.max(dists, axis=0) < self._color_tolerance + max(self._color_tolerance * 1.5, 20):
             return [-1]
         
     # Find minimum angle difference in hue    
@@ -429,7 +429,7 @@ class WebAnalyzer:
         sleep(0.5)
         if not self._game_window:
             print("Failed to find game window, if the game is actually running, set the monitor index manually", flush=True)
-            raise self.WindowNotFoundError
+            raise WebAnalyzer.WindowNotFoundError
     
     # Used by pywin32 to return window handles
     # If DBD window is found it's info is stored in _game_window and the window is brought to the foreground
@@ -481,6 +481,6 @@ class WebAnalyzer:
 if __name__ == "__main__":
     analyzer = WebAnalyzer()
     analyzer.initialize()
-    im = analyzer.debug_draw_points(["edges"])
+    im = analyzer.debug_draw_points(["prestige_large"])
     im.save(f"out_{analyzer._game_window.size}.png")
     print(f"Valid nodes: {analyzer.find_buyable_nodes()}")
