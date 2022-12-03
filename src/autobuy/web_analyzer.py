@@ -78,6 +78,8 @@ class WebAnalyzer:
     
     _sct : mss.base.MSSBase
     
+    _bring_to_front = True
+    
     _game_window: GameWindow
     
     _override_monitor_index = 0
@@ -143,7 +145,9 @@ class WebAnalyzer:
     
     def set_custom_midpoint(self, x: int, y: int):
         self._custom_midpoint = np.array([x,y],int)
-        
+    
+    def set_bring_to_front(self, bring_to_front : bool):
+        self._bring_to_front = bring_to_front
         
     # Captures a screenshot
     # bbox is start and end positions. Game window position offset is added here
@@ -402,6 +406,8 @@ class WebAnalyzer:
                                            np.array([monitor["left"], monitor["top"]], int),
                                            np.array([monitor["width"], monitor["height"]], int))
             return
+
+        
         win32gui.EnumWindows(self._enum_windows_callback, None)
         sleep(0.5)
         if not self._game_window:
@@ -421,6 +427,8 @@ class WebAnalyzer:
             return
         self._game_window = GameWindow(hwnd, np.array([x,y], int), np.array([w,h], int))
         print("Game window found automatically", flush=True)
+        if not self._bring_to_front:
+            return
         try:
             win32gui.SetForegroundWindow(hwnd)
             pass
@@ -445,5 +453,5 @@ class WebAnalyzer:
 if __name__ == "__main__":
     analyzer = WebAnalyzer()
     analyzer.initialize()
-    analyzer.debug_draw_points(f"out_{analyzer._game_window.size}.png", ["nodes"])
-    #print(analyzer.find_buyable_nodes())
+    #analyzer.debug_draw_points(f"out_{analyzer._game_window.size}.png", ["edges"])
+    print(f"Valid nodes: {analyzer.find_buyable_nodes()}")

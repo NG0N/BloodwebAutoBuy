@@ -21,7 +21,7 @@ class Autobuy:
     
     ## Options ##
     _start_paused : bool = False
-    _verbose : bool = True
+    _verbose : bool = False
     _time_limit : float = 0
     _auto_prestige : bool = True
     _ordering : Ordering = Ordering.SHUFFLE
