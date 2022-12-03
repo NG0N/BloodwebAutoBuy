@@ -37,9 +37,9 @@ Make sure that the game is in fullscreen mode and that the GUI scale is set to 1
     advanced_group = parser.add_argument_group(
     "Advanced", 
     """Customize the color detection parameters, might be required if you use strong filters. Disabling filters temporarily instead is probably easier.
-If your monitor resolution is unsupported, you can calibrate the sample points yourself
+If your monitor resolution is unsupported, you can calibrate the sample points yourself.
 All you have to do is to supply the X and Y pixel coordinates of the bloodweb center
-Use the debug with the Bloodweb open to see the results""")
+Use the 'Save test images' setting with the Bloodweb open to see the results""")
     
     
     options_group.add_argument('-m', '--monitor_index',
