@@ -1,51 +1,51 @@
 import numpy as np
-import os.path as path
 import mss, mss.tools
 import win32gui
 from time import sleep
-from PIL import Image, ImageDraw
-from dataclasses import dataclass
-from enum import Enum
+from enum import IntEnum
 
-@dataclass
 class GameWindow:
     handle : int
     position : np.ndarray[int]
     size : np.ndarray[int]
+    
+    def __init__(self, handle, position, size) -> None:
+        self.handle = handle
+        self.position = position
+        self.size = size
 
-
+# Reference resolution is used in sample point coordinates
+# The points are scaled from this resolution to whatever the game window size is
 REF_RESOLUTION = (2560,1440)
 ### These values are only valid for 2560x1440 and are scaled during runtime
 # Diameter of node rings
 NODE_SIZE = 100
-# 
-COLOR_CROP_SIZE = 30
+# Width of the square of pixels that is used to determine the node rarity
+# Scaled by resolution
+RARITY_CROP_SIZE = 30
+# Offset to the node edge where the color is sampled to determine if the node can be bought
+NODE_EDGE_OFFSET = np.array([-46,20], int)
+# Not implemented, offset to the white perk icon stripe
+#PERK_SAMPLE_OFFSET = np.array([24,-38], int)
 
-SAMPLE_OFFSET = np.array([-46,20],int)
-
+# Used to parse the sample point file
 NODE_COUNT = 30
 SAMPLE_COUNT_SMALL_PRESTIGE = 4
 SAMPLE_COUNT_LARGE_PRESTIGE = 3
 
-COLOR_DETECT_TOLERANCE = 20
-COLOR_NODE_AVAILABLE = np.array([117, 149, 156], int)
 COLOR_PRESTIGE_SMALL = np.array([[1, 0, 210], [248, 248, 251], [0, 0, 205], [53, 47, 40]], int)
 COLOR_PRESTIGE_LARGE = np.array([[6, 6, 201], [252, 252, 254], [56, 54, 53]], int)
 
 
 
-class Rarity(Enum):
-    COMMON = 0
-    UNCOMMON = 1
-    RARE = 2
-    VERY_RARE = 3
-    ULTRA_RARE = 4
-    EVENT = 5
+class Rarity(IntEnum):
+    COMMON, UNCOMMON, RARE, VERY_RARE, ULTRA_RARE, EVENT = range(6)
     def __lt__(self, other):
         if self.__class__ is other.__class__:
             return self.value < other.value
         return NotImplemented
 
+# Unused, hue is used instead
 RARITIES_BGR = {
     Rarity.COMMON     : [39, 52,70],
     Rarity.UNCOMMON   : [43,157,194],
@@ -56,23 +56,14 @@ RARITIES_BGR = {
 }
 
 
-RARITIES_HUE = {
+RARITIES_HUE = np.array([
     25,
     45,
     128,
     284,
     342,
-    # 42 Event is too similiar to yellow for the current detection
-}
-
-
-RARITY_NAMES = {
-    Rarity.COMMON     : "brown",
-    Rarity.UNCOMMON   : "yellow",
-    Rarity.RARE       : "green",
-    Rarity.VERY_RARE  : "purple",
-    Rarity.ULTRA_RARE : "iridescent",
-}
+    # 42 Event is too similiar to uncommon yellow for the current detection method
+], int)
 
 
 
@@ -80,44 +71,54 @@ RARITY_NAMES = {
 
 
 class WebAnalyzer:
-    _verbose : bool = False
+     # Default node edge color
+    _color_node_available = np.array([117, 149, 156], int)
+    _color_tolerance = 20
+    
     _sct : mss.base.MSSBase
     
     _game_window: GameWindow
     
+    _override_monitor_index = 0
+    
     # Sampling points in game window space
     _sample_points: np.ndarray[np.ndarray[int]]
+    # Views into _sample_points:
+    ## Coordinates of node edges
     _web_points = None
+    ## Coordinates of the node centers
     _web_nodes = None
+    # Coordinates for small and large prestige icons
     _small_prestige_points = None
     _large_prestige_points = None
+    
+   
     # Bounding box of _sample_points, in game window space
     # (startpos, endpos)
     _web_bbox: tuple = None
 
+    # Scaling factor, determined by <game window width> / <ref window width>
+    # Used to scale sample points
     _scaling = 1.0
-
-
-    _center_points : dict = {}
     
-    # Current center position for current resolution
+    # Center position for current resolution, in game window space
     _center_pos : np.ndarray[int]
     
     class GameResolutionError(Exception):
+        pass
+    class WindowNotFoundError(Exception):
         pass
     
     def __del__(self):
         self._sct.close()
         
-    def __init__(self, verbose: bool = False) -> None:
+    def __init__(self) -> None:
         self._sct = mss.mss()
-        self._verbose = verbose
-        
-        self._update_game_window_info()
-        
-        #points_file = "data/1920x1080.csv"
+    
+    # Manual initialization is needed for monitor override
+    def initialize(self):
+        self._update_game_window_info()        
         points_file = "data/2560x1440.csv"
-        
         try:
             self._import_points(points_file, tuple(self._game_window.size))
         except self.GameResolutionError as err:
@@ -129,10 +130,18 @@ class WebAnalyzer:
                     
         self._calculate_bounds()
         
-        #self.debug_draw_points(f"out_{self._game_window.size}.png", ["web"])
+    def set_color_available(self, rgb : tuple) -> None:
+        self._color_node_available = np.array([rgb[2],rgb[1],rgb[0]], np.int16)
+
+    def set_node_tolerance(self, node_tolerance: int) -> None:
+        self._color_tolerance = node_tolerance
+
+    def set_override_monitor_index(self, index: int) -> None:
+        self._override_monitor_index = index
         
-        
-    ## Bbox is start and end positions. Game window position is added
+    # Captures a screenshot
+    # bbox is start and end positions. Game window position offset is added here
+    # Returns in BGR format 
     def capture(self, bbox: tuple[int, int, int, int]) -> np.ndarray:
         absolute_bbox = (self._game_window.position[0].item() + bbox[0],
                          self._game_window.position[1].item() + bbox[1],
@@ -143,26 +152,25 @@ class WebAnalyzer:
         return img
 
 
-    # Takes a screen capture, samples the node positions, sorts by rarity
+    def get_node_position(self, node: int) -> tuple:
+        if node < 0:
+            return self._center_pos - self._game_window.position
+        return self._web_nodes[node] - self._game_window.position
+    
+    # Takes a screen capture, samples the node positions, sorts by rarity, most common first
     # 0-29 are normal nodes, -1 is prestige node
     # Returns None if no nodes detected
-    def find_buyable_nodes(self, cheap_first: bool = True):
+    def find_buyable_nodes(self):
         bbox = self._web_bbox
         
         # Convert to python int tuple for MSS
         capture_bbox = (bbox[0][0].item(), bbox[0][1].item(), bbox[1][0].item(), bbox[1][1].item())
         image = self.capture(capture_bbox)
                         
-        #buyable = []
-        rarities = []
-        
-            
-        
-        
         rim_positions = self._web_points - bbox[0]
         samples = image[rim_positions[:,1],rim_positions[:,0]]
-        dists = np.linalg.norm(np.subtract(samples, COLOR_NODE_AVAILABLE), axis=1)
-        buyable = np.asarray(dists < COLOR_DETECT_TOLERANCE).nonzero()[0]
+        dists = np.linalg.norm(np.subtract(samples, self._color_node_available), axis=1)
+        buyable = np.asarray(dists < self._color_tolerance).nonzero()[0]
         
         
         # Extract node images
@@ -202,36 +210,38 @@ class WebAnalyzer:
         hue *= 60
         hue[hue < 0] += 360
         
-        rarities = [self._find_closest_rarity(a) for a in hue]
+        rarities = np.array([self._find_closest_rarity(a) for a in hue],int)
         
         # Sort by rarity and return            
         if len(buyable) > 0: 
-            buyable = [x for _, x in sorted(zip(rarities, buyable), key=lambda pair: pair[0], reverse=not cheap_first)]
-            return buyable
+            p = rarities.argsort()
+            #rarities = np.array([*Rarity],object)[rarities[p]]
+            return buyable[p]
         
         # Check for small prestige node
         sample_positions = self._small_prestige_points - bbox[0]
         samples = image[sample_positions[:,1],sample_positions[:,0]]
         diffs = np.subtract(samples, COLOR_PRESTIGE_SMALL)
         dists = np.linalg.norm(diffs, axis=0)
-        if np.max(dists, axis=0) < COLOR_DETECT_TOLERANCE:
-            return -1
+        if np.max(dists, axis=0) < self._color_tolerance:
+            return [-1]
 
         # Check for large prestige node
         sample_positions = self._large_prestige_points - bbox[0]
         samples = image[sample_positions[:,1],sample_positions[:,0]]
         diffs = np.subtract(samples, COLOR_PRESTIGE_LARGE)
         dists = np.linalg.norm(diffs, axis=0)
-        if np.max(dists, axis=0) < COLOR_DETECT_TOLERANCE:
-            return -1
+        if np.max(dists, axis=0) < self._color_tolerance:
+            return [-1]
         
     # Find minimum angle difference in hue    
     def _find_closest_rarity(self, hue):
-        return Rarity(np.argmin([180 - abs(abs(hue - b) - 180) for b in RARITIES_HUE]))
+        return np.argmin([180 - abs(abs(hue - b) - 180) for b in RARITIES_HUE])
         
 
     # Reads the resolution file and stores the center points found
-    def _parse_resolution_info(self, filename):
+    def _parse_resolution_info(self, filename) -> dict:
+        center_points = {}
         with open(filename, "r") as f:
             for line in f.readlines():
                 line = line.rstrip('\n')
@@ -240,8 +250,8 @@ class WebAnalyzer:
                 pos_pair = pair[1].split(",", 1)
                 resolution = (int(res_pair[0]), int(res_pair[1]))
                 center_pos = np.array([int(pos_pair[0]), int(pos_pair[1])], int)
-                self._center_points[resolution] = center_pos
-
+                center_points[resolution] = center_pos
+        return center_points
 
     # Draws and saves an image file for debugging the currently loaded sample points
     def debug_draw_points(self, out_file: str, groups_to_show: list):
@@ -325,25 +335,24 @@ class WebAnalyzer:
 
     # Imports points from a file, transforming them to the correct scaling according to the _center_points table
     def _import_points(self, filename: str, resolution: tuple[int,int] = None) -> np.ndarray:
-        data = np.loadtxt(filename, dtype=int, delimiter=",", comments="#")
-        
-        self._sample_points = data
+        self._sample_points = np.loadtxt(filename, dtype=int, delimiter=",", comments="#")
         
         # Transform points if needed
         if resolution != REF_RESOLUTION:
             # Read web center points for different resolutions from a file
             resolution_file = "data/resolutions.txt"
-            
             try:
-                self._parse_resolution_info(resolution_file)
+                center_points = self._parse_resolution_info(resolution_file)
             except Exception as err:
                 print(f"Failed to read resolution file {resolution_file}", flush=True)
                 raise err
             
-            ref_center = self._center_points[REF_RESOLUTION]
-            if not resolution in self._center_points:
+            ref_center = center_points[REF_RESOLUTION]
+            if not resolution in center_points:
                 raise self.GameResolutionError("Unsupported game window resolution: {resolution}")
-            self._center_pos = self._center_points[resolution]
+            # This is stored for prestiging
+            self._center_pos = center_points[resolution]
+            
             # Remove web position from the points so they are centered around [0,0]
             local_pts = (self._sample_points - ref_center).astype(np.float64)
             # Scale according to game window width
@@ -353,10 +362,10 @@ class WebAnalyzer:
             self._sample_points = (local_pts + self._center_pos).astype(int)
 
         # Precalculate scaling dependent values  
-        self._rarity_sample_width = int(COLOR_CROP_SIZE * self._scaling)
+        self._rarity_sample_width = int(RARITY_CROP_SIZE * self._scaling)
         # Create array views for iterating
         self._web_nodes = self._sample_points[:NODE_COUNT]
-        self._web_points = self._sample_points[:NODE_COUNT] + (SAMPLE_OFFSET * self._scaling).astype(int)
+        self._web_points = self._sample_points[:NODE_COUNT] + (NODE_EDGE_OFFSET * self._scaling).astype(int)
         self._small_prestige_points = self._sample_points[NODE_COUNT:
             NODE_COUNT + SAMPLE_COUNT_SMALL_PRESTIGE]
         self._large_prestige_points = self._sample_points[NODE_COUNT + SAMPLE_COUNT_SMALL_PRESTIGE:
@@ -370,14 +379,20 @@ class WebAnalyzer:
         self._web_bbox = (min.astype(int), max.astype(int) + 1)
 
 
-
     def _update_game_window_info(self):
         self._game_window = None
+        # If set, override the window with the given monitor index
+        if self._override_monitor_index > 0:
+            monitor = self._sct.monitors[self._override_monitor_index]
+            self._game_window = GameWindow(None,
+                                           np.array([monitor["left"], monitor["top"]], int),
+                                           np.array([monitor["width"], monitor["height"]], int))
+            return
         win32gui.EnumWindows(self._enum_windows_callback, None)
         sleep(0.5)
         if not self._game_window:
-            self._game_window = GameWindow(None, np.array([0,0], int), np.array([1920,1080], int))
-            print("Failed to find game window", flush=True)
+            print("Failed to find game window, if the game is actually running, set Monitor index manually", flush=True)
+            raise self.WindowNotFoundError
     
     # Used by pywin32 to return window handles
     # If DBD window is found it's info is stored in _game_window and the window is brought to the foreground
@@ -391,15 +406,19 @@ class WebAnalyzer:
         if name != "DeadByDaylight":
             return
         self._game_window = GameWindow(hwnd, np.array([x,y], int), np.array([w,h], int))
-        
+        print("Game window found automatically", flush=True)
         try:
+            win32gui.SetForegroundWindow(hwnd)
             pass
-            #win32gui.SetForegroundWindow(hwnd)
         except Exception as err:
-            # SetForegroundWindow seems to fail randomly
-            if self._verbose:
-                print(f"win32gui Error:\n{err}")
+            #SetForegroundWindow seems to fail randomly
+            pass
+            
         
     
 if __name__ == "__main__":
+    from PIL import Image, ImageDraw
     analyzer = WebAnalyzer()
+    #analyzer.debug_draw_points(f"out_{self._game_window.size}.png", ["web"])
+    analyzer.initialize()
+    print(analyzer.find_buyable_nodes())

@@ -29,46 +29,57 @@ def main():
     parser = GooeyParser()
     options_group = parser.add_argument_group(
     "Options",
-    "Moving your mouse or pressing F3 will pause the program, press F3 again to resume.\nPress Esc or F2 to stop the program at any point.\nMake sure the game window is visible and in fullscreen.\nCurrently only supports 1920x1080 resolution with 100% GUI scale.")
+"""Moving your mouse or pressing F3 will pause the program, press F3 again to resume.
+Press Esc or F2 to stop the program at any point.
+Make sure that the game is in fullscreen mode and that the GUI scale is set to 100%.""")
     advanced_group = parser.add_argument_group(
     "Advanced", 
     "Customize the color detection parameters, might be required if you use strong filters. Disabling filters temporarily instead is probably easier.")
     
-    options_group.add_argument('-w', '--start_paused',
+    
+    options_group.add_argument('-m', '--monitor_index',
+                            default=0,
+                            metavar='Monitor index',
+                            help="Leave to 0 to let the game window be found automatically.",
+                            widget='IntegerField')
+    
+    options_group.add_argument('-w', '--activate_window',
+                        default=True,
+                        action="store_true", 
+                        metavar="Bring window to foreground",
+                        help="Focuses the game window at the start to make sure no other windows are covering it")
+
+    options_group.add_argument('-p', '--start_paused',
                             default=False,
                             metavar='Start Paused',
                             action="store_true", 
                             help="""Start the program in the paused state. Pressing F3 is required to start.""")
         
-    options_group.add_argument('-m', '--monitor_index',
-                            default=1,
-                            metavar='Monitor index',
-                            help="Select the monitor where the game is displayed. Starts from 1",
-                            widget='IntegerField')
-    
+
     ordering = options_group.add_mutually_exclusive_group()
     
-    ordering.add_argument('-r', '--reverse',
-                            metavar='Buy closest nodes first',
+    ordering.add_argument('-e', '--expensive',
+                            metavar='Buy the most expensive nodes first',
                             action="store_true", 
-                            help="""Buy the innermost available nodes first, rarer items will be less likely to be bought.\nIf disabled, the furthest away node available will be always bought first.""")
+                            help="""Buy the rarest nodes first""")
                         
     ordering.add_argument('-s', '--shuffle',
                             metavar="Randomize order",
                             action="store_true", 
                             help="Buy the nodes in a random order.")
-    options_group.add_argument('-p', '--should_prestige',
+    
+    options_group.add_argument('--should_prestige',
                             default=True,
                             action="store_true", 
                             metavar='Auto-Prestige',
                             help="Automatically advance prestige levels. Disable to pause after level 50")
+    
     
     options_group.add_argument('-t', '--time_limit',
                             metavar='Time limit',
                             default=0.0,
                             widget="DecimalField",
                             help="Stop after this duration (minutes), Set to 0 to disable limit.")
-
     
     advanced_group.add_argument('--ring_color',
                                 default="#9C9575",
@@ -77,17 +88,11 @@ def main():
                                 widget='ColourChooser') 
     
     advanced_group.add_argument('--node_color_threshold',
-                            default=50,
+                            default=20,
                             metavar='Node color detection threshold',
-                            help="Customize the detection tolerance for nodes. Too high values can result in false positives.\nDefault: 50",
+                            help="Customize the detection tolerance for nodes. Too high values can result in false positives.\nDefault: 20",
                             widget='IntegerField')    
     
-    advanced_group.add_argument('--prestige_color_threshold',
-                            default=50,
-                            metavar='Prestige color detection threshold',
-                            help="Customize the detection tolerance for prestige icon. Too high values can result in false positives.\nDefault: 4",
-                            widget='IntegerField')
-      
     advanced_group.add_argument('-v', '--verbose',
                                 metavar='Verbose output',
                                 action="store_true", 
@@ -95,23 +100,23 @@ def main():
         
     args = parser.parse_args()
 
-    ordering = Autobuy.Ordering.DEFAULT
+    ordering = Autobuy.Ordering.CHEAP
     if args.shuffle:
         ordering = Autobuy.Ordering.SHUFFLE
-    elif args.reverse:
-        ordering = Autobuy.Ordering.REVERSE
+    elif args.expensive:
+        ordering = Autobuy.Ordering.EXPENSIVE
         
     # Run the main program
     autobuy = Autobuy()
     autobuy.set_start_paused(bool(args.start_paused))
     autobuy.set_verbose(bool(args.verbose))
-    autobuy.set_monitor_index(int(args.monitor_index))
     autobuy.set_time_limit(float(args.time_limit) * 60.0)
     autobuy.set_auto_prestige(bool(args.should_prestige))
     autobuy.set_ordering(ordering)
-    autobuy.set_node_tolerance(int(args.node_color_threshold))
-    autobuy.set_prestige_tolerance(int(args.prestige_color_threshold))
-    autobuy.set_color_available(tuple(bytes.fromhex(args.ring_color[1:])))
+    autobuy.web_analyzer.set_override_monitor_index(int(args.monitor_index))
+    autobuy.web_analyzer.set_node_tolerance(int(args.node_color_threshold))
+    autobuy.web_analyzer.set_color_available(tuple(bytes.fromhex(args.ring_color[1:])))
+    autobuy.web_analyzer.initialize()
     autobuy.run()
     
 if __name__ == "__main__":
