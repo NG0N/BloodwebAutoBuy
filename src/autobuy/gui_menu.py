@@ -10,7 +10,7 @@ help_items = [
 'menuTitle': 'About',
 'name': 'Bloodweb AutoBuy',
 'description': 'Automated Bloodweb progression for Dead by Daylight',
-'version': '1.0',
+'version': '1.1',
 'copyright': 'Copyright (c) 2022 NGON',
 'website': 'https://github.com/NG0N/BloodwebAutoBuy',
 'license': """
