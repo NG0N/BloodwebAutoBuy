@@ -53,21 +53,18 @@ def main():
                         help='Buy the nodes in a random order.')
     
     options_group.add_argument('--should_prestige',
-                        default=True,
-                        action='store_true', 
+                        action='store_false', 
                         metavar='Auto-Prestige',
                         help='Automatically advance prestige levels. Disable to pause after level 50')
     
     
     options_group.add_argument('-p', '--start_paused',
-                        default=False,
                         metavar='Start Paused',
                         action='store_true', 
                         help='Start the program in the paused state. Pressing F3 is required to start.')
     
     options_group.add_argument('-w', '--activate_window',
-                        default=True,
-                        action='store_true', 
+                        action='store_false', 
                         metavar='Bring window to foreground',
                         help='Focuses the game window at the start to make sure no other windows are covering it')
 
@@ -145,12 +142,12 @@ def main():
     if args.unsupported_resolution_debug:
         # Run the custom resolution debug image generator 
         analyzer = WebAnalyzer()
-        analyzer.set_bring_to_front(bool(args.activate_window))
+        analyzer.set_bring_to_front(not bool(args.activate_window))
         analyzer.set_override_monitor_index(int(args.monitor_index))
         analyzer.set_custom_midpoint(int(args.unsupported_resolution_mid_x), int(args.unsupported_resolution_mid_y))
         try:
             analyzer.initialize()
-        except WebAnalyzer.GameResolutionError:
+        except (WebAnalyzer.GameResolutionError, WebAnalyzer.WindowNotFoundError):
             print("Failed to initialize", flush=True)
             return
         analyzer.save_debug_images()
@@ -168,9 +165,10 @@ def main():
     autobuy.set_start_paused(bool(args.start_paused))
     autobuy.set_verbose(bool(args.verbose))
     autobuy.set_time_limit(float(args.time_limit) * 60.0)
-    autobuy.set_auto_prestige(bool(args.should_prestige))
+    # Workaround, this version of gooey doesn't support True default checkboxes
+    autobuy.set_auto_prestige(not bool(args.should_prestige)) 
     autobuy.set_ordering(ordering)
-    autobuy.web_analyzer.set_bring_to_front(bool(args.activate_window))
+    autobuy.web_analyzer.set_bring_to_front(not bool(args.activate_window))
     autobuy.web_analyzer.set_override_monitor_index(int(args.monitor_index))
     autobuy.web_analyzer.set_node_tolerance(int(args.node_color_threshold))
     autobuy.web_analyzer.set_color_available(tuple(bytes.fromhex(args.ring_color[1:])))
