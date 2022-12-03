@@ -31,37 +31,45 @@ from web_analyzer import WebAnalyzer
 )
 def main():
     parser = GooeyParser()
-    options_group = parser.add_argument_group(
-                        'Options', description = gui_menu.options_group_desc)
-    advanced_group = parser.add_argument_group(
-                        'Advanced', 
-                        description = gui_menu.advanced_group_desc)
+    options_group = parser.add_argument_group('Options', description = gui_menu.options_group_desc)
+    advanced_group = parser.add_argument_group('Advanced', description = gui_menu.advanced_group_desc)
                         
     ordering = options_group.add_mutually_exclusive_group(
-                    gooey_options = {
-                        'initial_selection': 0
-                        }
-                    )
+                        gooey_options = { 'initial_selection': 0})
     
     ordering.add_argument('-c', '--cheap',
-                            metavar='Cheap Mode',
-                            action='store_true', 
-                            help='Buy the most common nodes first')
+                        metavar='Cheap Mode',
+                        action='store_true', 
+                        help='Buy the most common nodes first')
     ordering.add_argument('-e', '--expensive',
-                            metavar='Expensive Mode',
-                            action='store_true', 
-                            help='Buy the rarest nodes first.')
-                                
+                        metavar='Expensive Mode',
+                        action='store_true', 
+                        help='Buy the rarest nodes first.')
+                            
     ordering.add_argument('-s', '--shuffle',
-                            metavar='Random Mode',
-                            action='store_true', 
-                            help='Buy the nodes in a random order.')
+                        metavar='Random Mode',
+                        action='store_true', 
+                        help='Buy the nodes in a random order.')
     
+    options_group.add_argument('--should_prestige',
+                        default=True,
+                        action='store_true', 
+                        metavar='Auto-Prestige',
+                        help='Automatically advance prestige levels. Disable to pause after level 50')
+    
+    
+    options_group.add_argument('-p', '--start_paused',
+                        default=False,
+                        metavar='Start Paused',
+                        action='store_true', 
+                        help='Start the program in the paused state. Pressing F3 is required to start.')
+        
+        
     options_group.add_argument('-m', '--monitor_index',
-                            default=0,
-                            metavar='Monitor index',
-                            help='Leave to 0 to let the game window be found automatically.',
-                            widget='IntegerField')
+                        default=0,
+                        metavar='Monitor index',
+                        help='Leave to 0 to let the game window be found automatically.',
+                        widget='IntegerField')
     
     options_group.add_argument('-w', '--activate_window',
                         default=True,
@@ -69,87 +77,67 @@ def main():
                         metavar='Bring window to foreground',
                         help='Focuses the game window at the start to make sure no other windows are covering it')
 
-    options_group.add_argument('-p', '--start_paused',
-                            default=False,
-                            metavar='Start Paused',
-                            action='store_true', 
-                            help='Start the program in the paused state. Pressing F3 is required to start.')
-        
 
-
-    
-    options_group.add_argument('--should_prestige',
-                            default=True,
-                            action='store_true', 
-                            metavar='Auto-Prestige',
-                            help='Automatically advance prestige levels. Disable to pause after level 50')
-    
-    
     options_group.add_argument('-t', '--time_limit',
-                            metavar='Time limit',
-                            default=0.0,
-                            widget='DecimalField',
-                            help='Stop after this duration (minutes), Set to 0 to disable limit.')
+                        metavar='Time limit',
+                        default=0.0,
+                        widget='DecimalField',
+                        help='Stop after this duration (minutes), Set to 0 to disable limit.')
+    
+        
+    
     
     advanced_group.add_argument('--ring_color',
-                                default='#918b6a',
-                                metavar='Purchasable node ring color',
-                                help="""Customize the color that's used to detect whether a node is purchasable.
-Sampled in the middle of a node's yellow ring. Default: [R: 145, G: 139, B: 106]""", 
-                                widget='ColourChooser') 
+                        default='#918b6a',
+                        metavar='Purchasable node ring color',
+                        help="""Customize the color that's used to detect whether a node is purchasable.\nSampled in the middle of a node's yellow ring. Default: [R: 145, G: 139, B: 106]""", 
+                        widget='ColourChooser') 
 
     advanced_group.add_argument('--node_color_threshold',
-                            default=20,
-                            metavar='Node color detection threshold',
-                            help="""Customize the detection tolerance for nodes. Too high values can result in false positives.
-Default: 20""",
-                            widget='Slider',
-                            gooey_options = {
-                                    'min' : 0, 
-                                    'max' : 100, 
-                                    'increment' : 1
-                            })
-    
-    advanced_group.add_argument('-v', '--verbose',
-                                metavar='Verbose output',
-                                action='store_true', 
-                                help='Print debug info.')
-    
-    advanced_group.add_argument('--unsupported_resolution_debug',
-                                metavar='For unsupported resolutions: Save test images',
-                                default=False,
-                                action='store_true', 
-                                help='Turn on to save test images to preview the custom midpoint. Files beginning with BAB_<x>_<y>.png will be saved on the desktop.',
-                                widget='BlockCheckbox',
-                                gooey_options = {
-                                    'checkbox_label' : "Enable test mode"
-                                 })
-    
-    
-    advanced_group.add_argument('--unsupported_resolution_mid_x',
-                                metavar='For unsupported resolutions: Midpoint X',
-                                default=0,
-                                help='X coordinate of the Bloodweb midpoint',
-                                widget='IntegerField',
-                                gooey_options = {
-                                    'min' : 0, 
-                                    'max' : 12800, 
-                                    'increment' : 1
-                                })
+                        default=20,
+                        metavar='Node color detection threshold',
+                        help="""Customize the detection tolerance for nodes. Too high values can result in false positives.\nDefault: 20""",
+                        widget='Slider',
+                        gooey_options = {
+                            'min' : 0, 
+                            'max' : 100, 
+                            'increment' : 1})
 
-                                
+    
+   
+    advanced_group.add_argument('--unsupported_resolution_mid_x',
+                        metavar='For unsupported resolutions: Midpoint X',
+                        default=0,
+                        help='X coordinate of the Bloodweb midpoint',
+                        widget='IntegerField',
+                        gooey_options = {
+                            'min' : 0, 
+                            'max' : 12800, 
+                            'increment' : 1})
 
     advanced_group.add_argument('--unsupported_resolution_mid_y',
-                                metavar='For unsupported resolutions: Midpoint Y',
-                                default=0,
-                                help='Y coordinate of the Bloodweb midpoint',
-                                widget='IntegerField',
-                                gooey_options = {
-                                    'min' : 0, 
-                                    'max' : 12800, 
-                                    'increment' : 1
-                                })
-
+                        metavar='For unsupported resolutions: Midpoint Y',
+                        default=0,
+                        help='Y coordinate of the Bloodweb midpoint',
+                        widget='IntegerField',
+                        gooey_options = {
+                            'min' : 0, 
+                            'max' : 12800, 
+                            'increment' : 1})
+    
+    advanced_group.add_argument('-v', '--verbose',
+                        metavar='Verbose output',
+                        action='store_true', 
+                        help='Print debug info.')
+    
+    advanced_group.add_argument('--unsupported_resolution_debug',
+                        metavar='For unsupported resolutions: Save test images',
+                        default=False,
+                        action='store_true', 
+                        help='Turn on to save test images to preview the custom midpoint. Files beginning with BAB_<x>_<y>.png will be saved on the desktop.',
+                        widget='BlockCheckbox',
+                        gooey_options = {
+                            'checkbox_label' : "Enable test mode"})
 
     args = parser.parse_args()
 
