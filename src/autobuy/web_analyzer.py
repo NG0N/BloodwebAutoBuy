@@ -411,7 +411,7 @@ class WebAnalyzer:
         win32gui.EnumWindows(self._enum_windows_callback, None)
         sleep(0.5)
         if not self._game_window:
-            print("Failed to find game window, if the game is actually running, set Monitor index manually", flush=True)
+            print("Failed to find game window, if the game is actually running, set the monitor index manually", flush=True)
             raise self.WindowNotFoundError
     
     # Used by pywin32 to return window handles
@@ -423,7 +423,7 @@ class WebAnalyzer:
         w = rect[2] - x
         h = rect[3] - y
         name = win32gui.GetWindowText(hwnd).strip()
-        if name != "DeadByDaylight":
+        if name != "DeadByDaylighst":
             return
         self._game_window = GameWindow(hwnd, np.array([x,y], int), np.array([w,h], int))
         print("Game window found automatically", flush=True)

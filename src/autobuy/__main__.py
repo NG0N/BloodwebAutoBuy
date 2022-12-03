@@ -66,7 +66,7 @@ Use the debug with the Bloodweb open to see the results""")
     ordering.add_argument('-e', '--expensive',
                             metavar='Buy the most expensive nodes first',
                             action="store_true", 
-                            help="""Buy the rarest nodes first""")
+                            help="""Buy the rarest nodes first. Leave off to buy cheaper nodes first""")
                         
     ordering.add_argument('-s', '--shuffle',
                             metavar="Randomize order",
@@ -127,11 +127,16 @@ Use the debug with the Bloodweb open to see the results""")
     args = parser.parse_args()
 
     if args.unsupported_resolution_debug:
+        
         analyzer = WebAnalyzer()
         analyzer.set_bring_to_front(bool(args.activate_window))
         analyzer.set_override_monitor_index(int(args.monitor_index))
         analyzer.set_custom_midpoint(int(args.unsupported_resolution_mid_x), int(args.unsupported_resolution_mid_y))
-        analyzer.initialize()
+        try:
+            analyzer.initialize()
+        except:
+            print("Failed to initialize", flush=True)
+            return
         analyzer.save_debug_images()
         return
 

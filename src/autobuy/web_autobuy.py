@@ -225,7 +225,11 @@ class Autobuy:
     
     # Start buying the bloodweb nodes
     def run(self) -> None:
-        self.web_analyzer.initialize()
+        try:
+            self.web_analyzer.initialize()
+        except:
+            print("Failed to initialize", flush=True)
+            return
         idle_pos = self.web_analyzer.get_mouse_idle_pos()
         self._idle_mouse_pos = (idle_pos[0], idle_pos[1])
 
