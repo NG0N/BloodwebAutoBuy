@@ -108,7 +108,7 @@ Use the 'Save test images' setting with the Bloodweb open to see the results""")
                                 metavar='For unsupported resolutions: Save test images',
                                 default=False,
                                 action="store_true", 
-                                help="""Turn on to save test images to preview the custom midpoint. Files beginnning with BAB_<x>_<y> will be saved on the desktop.""",
+                                help="""Turn on to save test images to preview the custom midpoint. Files beginning with BAB_<x>_<y> will be saved on the desktop.""",
                                 widget="BlockCheckbox")
     
     
@@ -122,7 +122,7 @@ Use the 'Save test images' setting with the Bloodweb open to see the results""")
     advanced_group.add_argument('--unsupported_resolution_mid_y',
                                 metavar='For unsupported resolutions: Midpoint Y',
                                 default=0,
-                                help="""X coordinate of the Bloodweb midpoint""")
+                                help="""Y coordinate of the Bloodweb midpoint""")
 
 
     args = parser.parse_args()
