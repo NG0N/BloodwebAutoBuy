@@ -91,8 +91,6 @@ pyinstaller .\build.spec
 
 The resulting executable will be in the `dist/` directory
 
-*Note:* Due to [Gooey Issue #149](https://github.com/chriskiehl/Gooey/issues/149) the custom program icons in the `data/` directory won't show up in the packaged build. A temporary workaround is to copy and replace the images in `.venv/Lib/site-packages/gooey/images` with the images from the `data/` directory before building.
-
 ## Libraries Used
 * [python-mss](https://github.com/BoboTiG/python-mss): Screen capture
 * [Gooey](https://github.com/chriskiehl/Gooey): GUI library
