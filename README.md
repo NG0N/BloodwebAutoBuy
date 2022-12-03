@@ -13,13 +13,18 @@ Works by sampling pixels at predefined positions in the Bloodweb GUI and detecti
 Download the [latest release](https://github.com/NG0N/BloodwebAutoBuy/releases/latest/download/BloodwebAutoBuy.zip) and run `Bloodweb AutoBuy.exe`
 
 ## Usage Guide
-Before running the program you should disable any filters that may affect the color of the game.
-The game should be in fullscreen and the **UI Scale** in the in-game **Graphics settings**  should be set to the default 100%.
+The program opens to a configuration window, where you may optionally change the way the program runs.
 
-Pressing start will bring up the game window and the program will start buying the currently open Bloodweb, from the cheapest available nodes to the rarest by default.
+Before starting the automated buying:
+- A Bloodweb page should be open
+- Any filters that may affect the color of the game should be disabled
+- The game should be in **fullscreen** or **windowed fullscreen** mode
+- The **UI Scale** should be set to the default **100%** in the in-game Graphics settings .
+
+Pressing `Start` will bring up the game window and the program will start buying the currently open Bloodweb, from the cheapest available nodes to the rarest by default.
 
 
-### Hotkeys
+### **Hotkeys**
 - **F3**: Pause/Resume
 - **F2 / ESC**: Quit
 
@@ -27,36 +32,30 @@ Moving your mouse will also pause the program
 
 Note: The buying timings are designed for a brand new Bloodweb level, meaning that for the first level (the first few seconds) the program might mistime some of the mouse presses. The timings will align as soons as the program progresses to the next level.
 
-### Supported resolutions
-|w × h       |  
-| -----------|
-|3840 × 2160 |
-|2560 × 1600 |
-|2560 × 1440 |
-|1920 × 1080 |
-|1680 × 1050 |
-|1366 × 768  |
-|1360 × 768  |
+### Currently supported resolutions
+|16:9       |16:10       |
+| ----------| ----------|
+|3840 × 2160|2560 × 1600|
+|2560 × 1440|1680 × 1050
+|1920 × 1080
+|1366 × 768
+|1360 × 768
 
 ## Options
-
-#### Modes
-##### Cheap Mode
-The most common available nodes will be bought first, determined by their color.
-##### Expensive Mode
-The rarest available nodes will be bought first.
-##### Random Mode
-The nodes will be bought in a random order
-#### Auto-Prestige
+#### **Modes**
+- **Cheap Mode**: The most common available nodes will be bought first, determined by their color.
+- **Expensive Mode**: The rarest available nodes will be bought first.
+- **Random Mode**: The nodes will be bought in a random order
+#### **Auto-Prestige**
 Automatically buys the prestige node that appears after level 50.
 Disabling this option will pause the program when a prestige node is detected.
-#### Bring window to foreground
+#### **Bring window to foreground**
 When on, the game window will be brought into the foreground to make sure no other windows are blocking the capture.
-#### Start Paused
+#### **Start Paused**
 Running the program with this setting enabled will cause the program to begin in a paused state. Pressing F3 will unpause.
-#### Time limit
+#### **Time limit**
 Can be used to run the program for a set amount of time in minutes. Set to 0 to never stop automatically.
-#### Monitor Index
+#### **Monitor Index**
 Only needed if the game window cannot be detected automatically. Determines which monitor the game is captured from, 1 being the primary monitor. Set to 0 to let the program try to find the window automatically.
 
 
