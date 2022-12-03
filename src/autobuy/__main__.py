@@ -151,8 +151,12 @@ Use the debug with the Bloodweb open to see the results""")
     autobuy.web_analyzer.set_override_monitor_index(int(args.monitor_index))
     autobuy.web_analyzer.set_node_tolerance(int(args.node_color_threshold))
     autobuy.web_analyzer.set_color_available(tuple(bytes.fromhex(args.ring_color[1:])))
-    autobuy.web_analyzer.set_custom_midpoint(int(args.unsupported_resolution_mid_x), int(args.unsupported_resolution_mid_y))
-    autobuy.web_analyzer.initialize()
+    
+    custom_x = int(args.unsupported_resolution_mid_x)
+    custom_y = int(args.unsupported_resolution_mid_y)
+    if custom_x != 0 and custom_y != 0:
+        autobuy.web_analyzer.set_custom_midpoint(custom_x, custom_y)
+    
     autobuy.run()
     
 if __name__ == "__main__":
