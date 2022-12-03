@@ -24,7 +24,7 @@ class Autobuy:
     _verbose : bool = False
     _time_limit : float = 0
     _auto_prestige : bool = True
-    _ordering : Ordering = Ordering.SHUFFLE
+    _ordering : Ordering = Ordering.CHEAP
     _node_tolerance : int = 50
     _prestige_tolerance : int = 50
     
@@ -96,6 +96,8 @@ class Autobuy:
 
     # Moves the mouse out of way so no extra GUI elements are potentially drawn on top of the nodes
     def _reset(self) -> None:
+        if self.check_for_mouse_pause():
+            return
         mouse.move(self._idle_mouse_pos[0], self._idle_mouse_pos[1])
         self._last_mouse_pos = self._idle_mouse_pos
         
@@ -205,7 +207,6 @@ class Autobuy:
         index = 0 if self._ordering != self.Ordering.EXPENSIVE else -1
         if self._ordering == self.Ordering.SHUFFLE:
             index = randrange(0,len(nodes))
-
         node = nodes[index]
         
         # Normal node
