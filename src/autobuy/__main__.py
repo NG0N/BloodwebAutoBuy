@@ -37,7 +37,8 @@ Make sure that the game is in fullscreen mode and that the GUI scale is set to 1
     advanced_group = parser.add_argument_group(
     "Advanced", 
     """Customize the color detection parameters, might be required if you use strong filters. Disabling filters temporarily instead is probably easier.
-If your monitor resolution is unsupported, you can calibrate the sample points yourself.
+If your monitor resolution is unsupported, you can calibrate the sample points yourself
+
 All you have to do is to supply the X and Y pixel coordinates of the bloodweb center
 Use the 'Save test images' setting with the Bloodweb open to see the results""")
     
@@ -87,11 +88,11 @@ Use the 'Save test images' setting with the Bloodweb open to see the results""")
                             help="Stop after this duration (minutes), Set to 0 to disable limit.")
     
     advanced_group.add_argument('--ring_color',
-                                default="#9C9575",
+                                default="#918b6a",
                                 metavar='Purchasable node ring color',
-                                help="Customize the color that's used to detect whether a node is purchasable.\nSampled in the middle of a node's yellow ring. Default: [R: 156, G: 149, B: 117]", 
+                                help="Customize the color that's used to detect whether a node is purchasable.\nSampled in the middle of a node's yellow ring. Default: [R: 145, G: 139, B: 106]", 
                                 widget='ColourChooser') 
-    
+
     advanced_group.add_argument('--node_color_threshold',
                             default=20,
                             metavar='Node color detection threshold',

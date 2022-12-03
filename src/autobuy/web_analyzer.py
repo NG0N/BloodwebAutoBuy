@@ -73,8 +73,8 @@ RARITIES_HUE = np.array([
 
 
 class WebAnalyzer:
-     # Default node edge color
-    _color_node_available = np.array([117, 149, 156], int)
+    # Default node edge color
+    _color_node_available = np.array([ 106, 139, 145 ], int)
     _color_tolerance = 20
     
     _sct : mss.base.MSSBase
@@ -180,11 +180,10 @@ class WebAnalyzer:
     # Returns None if no nodes detected
     def find_buyable_nodes(self):
         bbox = self._web_bbox
-        
+           
         # Convert to python int tuple for MSS
         capture_bbox = (bbox[0][0].item(), bbox[0][1].item(), bbox[1][0].item(), bbox[1][1].item())
         image = self.capture(capture_bbox)
-
         rim_positions = self._web_points - bbox[0]
         samples = image[rim_positions[:,1],rim_positions[:,0]]
         dists = np.linalg.norm(np.subtract(samples, self._color_node_available), axis=1)
@@ -463,5 +462,5 @@ class WebAnalyzer:
 if __name__ == "__main__":
     analyzer = WebAnalyzer()
     analyzer.initialize()
-    #analyzer.debug_draw_points(f"out_{analyzer._game_window.size}.png", ["edges"])
+    analyzer.debug_draw_points(f"out_{analyzer._game_window.size}.png", ["edges"])
     print(f"Valid nodes: {analyzer.find_buyable_nodes()}")
