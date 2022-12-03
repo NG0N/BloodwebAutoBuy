@@ -110,7 +110,7 @@ class WebAnalyzer:
     _center_pos : np.ndarray[int]
     
     class GameResolutionError(Exception):
-        resolution: str
+        resolution: str = ""
     class WindowNotFoundError(Exception):
         pass
     
@@ -122,6 +122,7 @@ class WebAnalyzer:
     
     # Manual initialization is needed for monitor override
     def initialize(self):
+        print("\n---- Initializing ----\n")
         self._update_game_window_info()
         
         try:
@@ -133,7 +134,7 @@ class WebAnalyzer:
         try:
             self._import_points(points_file, tuple(self._game_window.size))
         except self.GameResolutionError as err:
-            print(f"Unsupported resolution: {err.resolution}, You can manually calibrate in the program settings", flush=True)
+            print(f"Unsupported resolution: {err.resolution}, You can manually calibrate the web midpoint in the advanced settings", flush=True)
             raise err
         except IOError as err:
             print(f"Failed to import sample points in file {points_file}", flush=True)
@@ -271,7 +272,7 @@ class WebAnalyzer:
         return center_points
 
     # Draws and saves an image file for debugging the currently loaded sample points
-    def debug_draw_points(self, out_file: str, groups_to_show: list):
+    def debug_draw_points(self, groups_to_show: list) -> Image.Image:
         # Add padding for drawing
         bbox = (self._web_bbox[0] - int(NODE_SIZE * 0.5),
                 self._web_bbox[1] + int(NODE_SIZE * 0.5))
@@ -346,7 +347,7 @@ class WebAnalyzer:
                     im.paste(zoomed, paste_pos, mask)
                     draw.ellipse((paste_pos, (paste_pos[0] + zoom_paste_size, paste_pos[1] + zoom_paste_size)), outline=group_colors[pt_group], width=2)
 
-        im.save(out_file)
+        return im
 
 
 
@@ -368,15 +369,20 @@ class WebAnalyzer:
                 raise err
             
             has_custom_midpoint = self._custom_midpoint is not None
-            
             ref_center = center_points[REF_RESOLUTION]
             if not resolution in center_points and not has_custom_midpoint:
-                raise self.GameResolutionError(resolution.tostring())
+                err = self.GameResolutionError("Unsupported resolution")
+                try:
+                    err.resolution = (str(resolution[0]),str(resolution[1]))
+                except:
+                    err.resolution = ""
+                raise err
             # This is stored for prestiging
-            self._center_pos = center_points[resolution] 
             if has_custom_midpoint:
                 self._center_pos = self._custom_midpoint
                 print(f"Using custom midpoint {self._custom_midpoint}", flush=True)
+            else:
+                self._center_pos = center_points[resolution] 
             # Remove web position from the points so they are centered around [0,0]
             local_pts = (self._sample_points - ref_center).astype(np.float64)
             # Scale according to game window width
@@ -446,6 +452,7 @@ class WebAnalyzer:
             pass
     
     def save_debug_images(self):
+        print("\n---- Starting custom resolution tester ----\n")
         x = self._custom_midpoint[0]
         y = self._custom_midpoint[1]
         
@@ -453,14 +460,25 @@ class WebAnalyzer:
         nodes_filename = f"BAB_{x}_{y}_nodes.png"
         
         desktop = Path.home() / "Desktop"
-        print("Saving preview images for custom midpoint...", flush=True)
-        self.debug_draw_points(desktop / edges_filename, ["edges"])
-        self.debug_draw_points(desktop / nodes_filename, ["nodes"])
-        print(f"Done! Files created:\n{desktop / edges_filename}\n{desktop / nodes_filename}",flush=True)
+        edges_image_path = desktop / edges_filename
+        nodes_image_path = desktop / nodes_filename
+        print("Creating preview images for custom midpoint...", flush=True)
+        edge_im = self.debug_draw_points(["edges"])
+        nodes_im = self.debug_draw_points(["nodes"])
+        try:
+            edge_im.save(edges_image_path)
+            nodes_im.save(nodes_image_path)
+            print(f"Done! Files created:\n  {edges_image_path}\n  {nodes_image_path}",flush=True)
+        except PermissionError:
+            print(f"Could not save images: Access to output directory '{desktop}' was denied")
+        except:
+            print("Could not save images: Failed to save file")
+            
     
     
 if __name__ == "__main__":
     analyzer = WebAnalyzer()
     analyzer.initialize()
-    analyzer.debug_draw_points(f"out_{analyzer._game_window.size}.png", ["edges"])
+    im = analyzer.debug_draw_points(["edges"])
+    im.save(f"out_{analyzer._game_window.size}.png")
     print(f"Valid nodes: {analyzer.find_buyable_nodes()}")
