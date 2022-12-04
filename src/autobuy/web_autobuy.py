@@ -166,7 +166,7 @@ class Autobuy:
         if self._verbose:
             log(f"  Buying node {node}")
 
-        required_delay = max(0.41 + self._timing_offset_2, 0) if self._level_bought_nodes >= 4 else max(0.0166666667 + self._timing_offset_1, 0)
+        required_delay = max(0.43 + self._timing_offset_2, 0) if self._level_bought_nodes >= 4 else max(0.0166666667 + self._timing_offset_1, 0)
         diff = (perf_counter() - self._time_last_bought)
         if diff < required_delay:
             sleep(max(required_delay - diff, 0))

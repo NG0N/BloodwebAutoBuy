@@ -103,7 +103,7 @@ def main():
                     widget='Slider',
                     help='Add or remove buying delay after the Entity starts blocking nodes\nUnit: 10 ms',
                     gooey_options = {
-                        'min' : -41, 
+                        'min' : -43, 
                         'max' : 100, 
                         'increment' : 1})
 
