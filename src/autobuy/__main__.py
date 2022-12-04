@@ -75,6 +75,8 @@ def main():
                         widget='DecimalField',
                         help='Stop after this duration (minutes), Set to 0 to disable limit.')
     
+
+    
     options_group.add_argument('-m', '--monitor_index',
                         default=0,
                         metavar='Monitor index',
@@ -85,6 +87,26 @@ def main():
                             'max' : 63, 
                             'increment' : 1})
     
+    options_group.add_argument('--first_timing_offset',
+                    metavar='Finetune buying interval (First 5 nodes)',
+                    default=0.0,
+                    widget='Slider',
+                    help='Add or remove buying delay before the Entity starts blocking nodes\nUnit: 10 ms',
+                    gooey_options = {
+                        'min' : -2, 
+                        'max' : 100, 
+                        'increment' : 1})    
+    
+    options_group.add_argument('--second_timing_offset',
+                    metavar='Finetune buying interval (After 5 nodes)',
+                    default=0.0,
+                    widget='Slider',
+                    help='Add or remove buying delay after the Entity starts blocking nodes\nUnit: 10 ms',
+                    gooey_options = {
+                        'min' : -41, 
+                        'max' : 100, 
+                        'increment' : 1})
+
     
     advanced_group.add_argument('--ring_color',
                         default='#918b6a',
@@ -165,6 +187,8 @@ def main():
     autobuy.set_start_paused(bool(args.start_paused))
     autobuy.set_verbose(bool(args.verbose))
     autobuy.set_time_limit(float(args.time_limit) * 60.0)
+    autobuy.set_timing_offset_1(float(args.first_timing_offset) / 100)
+    autobuy.set_timing_offset_2(float(args.second_timing_offset) / 100)
     # Workaround, this version of gooey doesn't support True default checkboxes
     autobuy.set_auto_prestige(not bool(args.should_prestige)) 
     autobuy.set_ordering(ordering)

@@ -481,6 +481,6 @@ class WebAnalyzer:
 if __name__ == "__main__":
     analyzer = WebAnalyzer()
     analyzer.initialize()
-    im = analyzer.debug_draw_points(["prestige_large"])
+    im = analyzer.debug_draw_points(["edges"])
     im.save(f"out_{analyzer._game_window.size}.png")
     print(f"Valid nodes: {analyzer.find_buyable_nodes()}")

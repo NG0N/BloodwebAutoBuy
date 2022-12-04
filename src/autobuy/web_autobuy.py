@@ -36,7 +36,16 @@ class Autobuy:
     _color_available : tuple
     _color_purchased : tuple
     
+    # Offsets to the buying intervals
+    # Affects first 5 nodes
+    _timing_offset_1 : float = 0.0
+    # Affects nodes after 5
+    _timing_offset_2 : float = 0.0
+    
+    
+    # Keeps track if a valid node was found in the current buy loop
     _found_none_prev = True
+    
     ## Runtime attributes ##
     
     # Used to pause the program when the user tries to move the mouse while autobuy is in progress 
@@ -78,6 +87,14 @@ class Autobuy:
         
     def set_start_paused(self, start_paused: bool) -> None:
         self._start_paused = start_paused
+    
+
+    def set_timing_offset_1(self, timing_offset: float) -> None:
+        self._timing_offset_1 = timing_offset
+    
+
+    def set_timing_offset_2(self, timing_offset: float) -> None:
+        self._timing_offset_2 = timing_offset
     
 
     # Click and hold at absolute screen position for duration
@@ -149,10 +166,10 @@ class Autobuy:
         if self._verbose:
             log(f"  Buying node {node}")
 
-        required_delay = 0.36 if self._level_bought_nodes >= 4 else 0.0166666667
+        required_delay = max(0.41 + self._timing_offset_2, 0) if self._level_bought_nodes >= 4 else max(0.0166666667 + self._timing_offset_1, 0)
         diff = (perf_counter() - self._time_last_bought)
         if diff < required_delay:
-            sleep(required_delay - diff)
+            sleep(max(required_delay - diff, 0))
         
         self.click(clickpos, 0.5)
         
