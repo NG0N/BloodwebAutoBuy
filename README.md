@@ -57,6 +57,11 @@ Running the program with this setting enabled will cause the program to begin in
 Can be used to run the program for a set amount of time in minutes. Set to 0 to never stop automatically.
 #### **Monitor Index**
 Only needed if the game window cannot be detected automatically. Determines which monitor the game is captured from, 1 being the primary monitor. Set to 0 to let the program try to find the window automatically.
+#### **Finetune buying interval**
+Adjusts the timing between buying nodes. The lowest possible timings depend on the game's framerate. Sliders use an interval of 10 ms.
+
+**First 5 Nodes** affects the interval before the nodes start to get blocked.
+**After 5 Nodes** affects the interval after the nodes start to get blocked.
 
 
 ## Manual Installation
