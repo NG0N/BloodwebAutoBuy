@@ -10,7 +10,7 @@ Automates spending bloodpoints.
 Works by sampling pixels at predefined positions in the Bloodweb GUI and detecting which nodes are available to buy according to the pixel color.
 
 ## Installation
-Download the [latest release](https://github.com/NG0N/BloodwebAutoBuy/releases/latest/download/BloodwebAutoBuy.zip) and run `Bloodweb AutoBuy.exe`
+From the `Assets` section of the [latest release](https://github.com/NG0N/BloodwebAutoBuy/releases/latest/), download and extract `Bloodweb AutoBuy-1.x.x.zip`
 
 ## Usage Guide
 The program opens to a configuration window, where you may optionally change the way the program runs.
