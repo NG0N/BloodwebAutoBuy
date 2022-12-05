@@ -210,8 +210,7 @@ class Autobuy:
         # Move mouse out of the way
         self._reset() 
         nodes = self.web_analyzer.find_buyable_nodes()
-        if nodes is None:
-            
+        if len(nodes) == 0:
             self._level_bought_nodes = 0
             # Prevent repeating
             if self._verbose and not self._found_none_prev:

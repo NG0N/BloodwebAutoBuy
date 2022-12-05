@@ -23,6 +23,7 @@ class GameWindow:
 # Reference resolution is used in sample point coordinates
 # The points are scaled from this resolution to whatever the game window size is
 REF_RESOLUTION = (2560,1440)
+REF_ASPECT_CUTOFF = 16/9
 
 ### These values are only valid for 2560x1440 and are scaled during runtime
 # Width of the square of pixels that is used to determine the node rarity
@@ -161,8 +162,8 @@ class WebAnalyzer:
     def set_override_monitor_index(self, index: int) -> None:
         self._override_monitor_index = index
     
-    def set_custom_midpoint(self, x: int, y: int):
-        self._custom_midpoint = np.array([x,y],int)
+    def set_custom_midpoint(self, x: float, y: float):
+        self._custom_midpoint = np.array([x,y], float)
     
     def set_bring_to_front(self, bring_to_front : bool):
         self._bring_to_front = bring_to_front
@@ -207,6 +208,7 @@ class WebAnalyzer:
         diffs = rim_imgs - color
         dists = np.linalg.norm(diffs, axis=(2))
         min_dists = np.min(np.abs(dists),axis=1)
+        
         return (min_dists < tolerance).nonzero()[0]
     
     # Takes a screen capture, samples the node positions, sorts by rarity, most common first
@@ -227,7 +229,6 @@ class WebAnalyzer:
         edge_positions = self._web_points - bbox[0]
         # Get indices of the positions that are close to the color of a buyable node
         buyable = self._get_positions_approx_color(image, edge_positions, self._color_node_available, self._color_tolerance, 2)
-
         # Extract node images
         node_positions = self._web_nodes[buyable] - bbox[0]
         
@@ -266,7 +267,6 @@ class WebAnalyzer:
         hue[hue < 0] += 360
         
         rarities = np.array([self._find_closest_rarity(a) for a in hue],int)
-        
         # Sort by rarity and return            
         if len(buyable) > 0: 
             p = rarities.argsort()
@@ -288,6 +288,8 @@ class WebAnalyzer:
         dists = np.linalg.norm(diffs, axis=0)
         if np.max(dists, axis=0) < self._color_tolerance + max(self._color_tolerance * 1.5, 20):
             return PRESTIGE_ONLY
+        
+        return []
         
     # Find minimum angle difference in hue    
     def _find_closest_rarity(self, hue):
@@ -369,7 +371,7 @@ class WebAnalyzer:
         
         if groups_to_show.count("edges") > 0:
             buyable = self.find_buyable_nodes()
-            print(buyable)
+
         draw = ImageDraw.Draw(im, "RGBA")
         for pt_group in groups_to_show:
             pts = pts_groups[pt_group]
@@ -433,15 +435,22 @@ class WebAnalyzer:
                 self._center_pos = self._custom_midpoint
                 print(f"Using custom midpoint {self._custom_midpoint}", flush=True)
             else:
-                self._center_pos = center_points[resolution] 
+                self._center_pos = center_points[resolution]
+            
+            aspect = resolution[0] / resolution[1]
             # Remove web position from the points so they are centered around [0,0]
             local_pts = (self._sample_points - ref_center).astype(float)
-            # Scale according to game window width
-            self._scaling = resolution[0] / REF_RESOLUTION[0]
+            if aspect > REF_ASPECT_CUTOFF: 
+                # Scale according to game window height
+                self._scaling = resolution[1] / REF_RESOLUTION[1]
+            else:
+                # Scale according to game window width
+                self._scaling = resolution[0] / REF_RESOLUTION[0]
+                
             local_pts *= self._scaling
             # Add the web offset back
             self._sample_points = np.round(local_pts + self._center_pos).astype(int)
-            
+
         # Precalculate scaling dependent values  
         self._rarity_sample_width = int(RARITY_CROP_SIZE * self._scaling)
         # Create array views for iterating
@@ -515,8 +524,8 @@ class WebAnalyzer:
         x = self._custom_midpoint[0]
         y = self._custom_midpoint[1]
         
-        edges_filename = f"BAB_{x}_{y}_edges.png"
-        nodes_filename = f"BAB_{x}_{y}_nodes.png"
+        edges_filename = f"BAB_{'{:.1f}'.format(x)}_{'{:.1f}'.format(y)}_edges.png"
+        nodes_filename = f"BAB_{'{:.1f}'.format(x)}_{'{:.1f}'.format(y)}_nodes.png"
         
         desktop = Path.home() / "Desktop"
         edges_image_path = desktop / edges_filename

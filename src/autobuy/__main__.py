@@ -129,21 +129,21 @@ def main():
                         metavar='For unsupported resolutions: Midpoint X',
                         default=0,
                         help='X coordinate of the Bloodweb midpoint',
-                        widget='IntegerField',
+                        widget='DecimalField',
                         gooey_options = {
                             'min' : 0, 
                             'max' : 12800, 
-                            'increment' : 1})
+                            'increment' : 0.5})
 
     advanced_group.add_argument('--unsupported_resolution_mid_y',
                         metavar='For unsupported resolutions: Midpoint Y',
                         default=0,
                         help='Y coordinate of the Bloodweb midpoint',
-                        widget='IntegerField',
+                        widget='DecimalField',
                         gooey_options = {
                             'min' : 0, 
                             'max' : 12800, 
-                            'increment' : 1})
+                            'increment' : 0.5})
     
     advanced_group.add_argument('-v', '--verbose',
                         metavar='Verbose output',
@@ -166,7 +166,7 @@ def main():
         analyzer = WebAnalyzer()
         analyzer.set_bring_to_front(not bool(args.activate_window))
         analyzer.set_override_monitor_index(int(args.monitor_index))
-        analyzer.set_custom_midpoint(int(args.unsupported_resolution_mid_x), int(args.unsupported_resolution_mid_y))
+        analyzer.set_custom_midpoint(float(args.unsupported_resolution_mid_x), float(args.unsupported_resolution_mid_y))
         try:
             analyzer.initialize()
         except (WebAnalyzer.GameResolutionError, WebAnalyzer.WindowNotFoundError):
@@ -197,8 +197,8 @@ def main():
     autobuy.web_analyzer.set_node_tolerance(int(args.node_color_threshold))
     autobuy.web_analyzer.set_color_available(tuple(bytes.fromhex(args.ring_color[1:])))
     
-    custom_x = int(args.unsupported_resolution_mid_x)
-    custom_y = int(args.unsupported_resolution_mid_y)
+    custom_x = float(args.unsupported_resolution_mid_x)
+    custom_y = float(args.unsupported_resolution_mid_y)
     if custom_x != 0 and custom_y != 0:
         autobuy.web_analyzer.set_custom_midpoint(custom_x, custom_y)
     
