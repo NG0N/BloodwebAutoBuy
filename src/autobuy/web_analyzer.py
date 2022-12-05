@@ -164,7 +164,7 @@ class WebAnalyzer:
     
     def set_custom_midpoint(self, x: float, y: float):
         self._custom_midpoint = np.array([x,y], float)
-    
+
     def set_bring_to_front(self, bring_to_front : bool):
         self._bring_to_front = bring_to_front
     
@@ -408,7 +408,7 @@ class WebAnalyzer:
     def _import_points(self, filename: str, resolution: tuple[int,int] = None) -> np.ndarray:
         self._sample_points = np.loadtxt(filename, dtype=int, delimiter=",", comments="#")
         # Transform points if needed
-        if resolution != REF_RESOLUTION:
+        if True:#resolution != REF_RESOLUTION:
             # Read web center points for different resolutions from a file
             try:
                 wd = sys._MEIPASS
@@ -521,8 +521,8 @@ class WebAnalyzer:
     
     def save_debug_images(self):
         print("\n---- Starting custom resolution tester ----")
-        x = self._custom_midpoint[0]
-        y = self._custom_midpoint[1]
+        x = self._center_pos[0]
+        y = self._center_pos[1]
         
         edges_filename = f"BAB_{'{:.1f}'.format(x)}_{'{:.1f}'.format(y)}_edges.png"
         nodes_filename = f"BAB_{'{:.1f}'.format(x)}_{'{:.1f}'.format(y)}_nodes.png"
