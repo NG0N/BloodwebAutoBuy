@@ -8,7 +8,7 @@ from web_analyzer import WebAnalyzer
 
 @Gooey(
     program_name = 'Bloodweb AutoBuy',
-    program_description = 'Automated Bloodweb progression for Dead by Daylight',
+    program_description = 'Automated Bloodweb progression',
     image_dir = local_resource_path('data/images'),
     body_bg_color = '#FFFFFF',
     header_bg_color = '#C9B899',
