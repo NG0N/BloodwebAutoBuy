@@ -7,7 +7,7 @@ import gui_menu
 from web_analyzer import WebAnalyzer
 
 @Gooey(
-    program_name = 'Bloodweb AutoBuy',
+    program_name = 'Bloodweb AutoBuy 1.1.10',
     program_description = 'Automated Bloodweb progression',
     image_dir = local_resource_path('data/images'),
     body_bg_color = '#FFFFFF',

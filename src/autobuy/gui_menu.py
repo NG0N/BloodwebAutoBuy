@@ -17,6 +17,11 @@ help_items = [
 'url': 'https://github.com/NG0N/BloodwebAutoBuy'
 },
 {
+'type': 'Link',
+'menuTitle': 'Check for Updates',
+'url': 'https://github.com/NG0N/BloodwebAutoBuy/releases/latest'
+},
+{
 'type': 'AboutDialog',
 'menuTitle': 'About',
 'name': 'Bloodweb AutoBuy',
