@@ -1,6 +1,9 @@
 # Bloodweb AutoBuy
 Automates spending bloodpoints.
 
+
+## NOTE: Currently does not handle event mystery boxes.
+
 **Support added for common resolutions!**
 
 * Choose whether you want to buy rare or common nodes first
@@ -101,6 +104,9 @@ pyinstaller .\build.spec
 ```
 
 The resulting executable will be in the `dist/` directory
+
+## Other Projects
+* [Bloodweb Emporium](https://github.com/IIInitiationnn/BloodEmporium) More sophisticated item detection, customizable buying order 
 
 ## Libraries Used
 * [python-mss](https://github.com/BoboTiG/python-mss): Screen capture
