@@ -106,7 +106,7 @@ pyinstaller .\build.spec
 The resulting executable will be in the `dist/` directory
 
 ## Other Projects
-* [Bloodweb Emporium](https://github.com/IIInitiationnn/BloodEmporium) More sophisticated item detection, customizable buying order 
+* [Bloodweb Emporium](https://github.com/IIInitiationnn/BloodEmporium) by [IIInitiationnn](https://github.com/IIInitiationnn): More sophisticated item detection, customizable buying order 
 
 ## Libraries Used
 * [python-mss](https://github.com/BoboTiG/python-mss): Screen capture
