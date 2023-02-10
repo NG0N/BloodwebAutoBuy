@@ -1,8 +1,8 @@
 # Bloodweb AutoBuy
 Automates spending bloodpoints.
 
-
-## NOTE: Currently does not handle event mystery boxes.
+### NOTE: A single user has reported being banned after running this program. Make sure you understand the risks of using macros and the end-user license agreements of any games you play.
+### NOTE: Currently does not handle event mystery boxes.
 
 **Support added for common resolutions!**
 
