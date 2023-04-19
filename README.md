@@ -1,7 +1,10 @@
+No longer maintained after patch 6.7.0 added automatic progression in-game, making this macro obsolete.
+
+
 # Bloodweb AutoBuy
 Automates spending bloodpoints.
 
-### NOTE: A single user claims to have been banned after running this program. Make sure you understand the risks of using macros and the end-user license agreements of any games you play.
+
 ### NOTE: Currently does not handle event mystery boxes.
 
 **Support added for common resolutions!**
